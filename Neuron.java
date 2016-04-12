@@ -42,8 +42,4 @@ public class Neuron {
 	private float phi(float x) {
 		return 1/(1+Math.exp(-x));
 	}
-
-	private float phiprime(float x) {
-		return -Math.exp(-x)/Math.pow(1+Math.exp(-x),2);
-	}
 }
