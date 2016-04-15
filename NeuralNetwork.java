@@ -2,8 +2,10 @@ import java.util.*;
 
 public class NeuralNetwork {
 	private List<List<Perceptron>> network;
+	private double learningRate;
 
-	public NeuralNetwork(int inputs, List<Integer> sizes) {
+	public NeuralNetwork(int inputs, List<Integer> sizes, double lR) {
+		learningRate=lR;
 		network = new ArrayList<List<Perceptron>>(sizes.size());
 		for (int i = 0; i < sizes.size(); i++) {
 			List<Perceptron> col = new ArrayList<Perceptron>(sizes.get(i));
@@ -21,28 +23,28 @@ public class NeuralNetwork {
 		}
 	}
 
-	public List<Double> out(List<Double> init) {
-		List<Double> outArray = init;
-		List<Double> dummyArray;
-		for (int col = 0; col < network.size(); col++) {
-			dummyArray = new ArrayList<Double>(network.get(col).size());
-			//remove recursion
-		}
-		if (col == 0) {
-			for (int i = 0; i < outArray.size(); i++) {
-				outArray.add(network.get(col).get(i).out(out(col-1)));
-			}
-		}
-		else {
-			for (int i = 0; i < outArray.size(); i++) {
-				outArray.add(network.get(col).get(i).out(input));
-			}
-		}
+	public void setLR(double lR) {
+		learningRate = lR;
+	}
+
+	public double getLR() {
+		return learningRate;
 	}
 
 	public List<Double> out(List<Double> init) {
-		input = init;
-		return out(network.size()-1);
+		List<Double> outArray = init;
+		List<Double> dummyArray;
+		double pass = 0;
+		for (int col = 0; col < network.size(); col++) {
+			dummyArray = new ArrayList<Double>(network.get(col).size());
+			for (int i = 0; i < network.get(col).size(); i++) {
+				pass = network.get(col).get(i).out(outArray);
+				dummyArray.add(pass);
+				network.get(col).get(i).setOutput(pass);
+			}
+			outArray = dummyArray;
+		}
+		return outArray;
 	}
 
 	private double error(int nodeId, List<Double> init, List<Double> expected) {
@@ -59,7 +61,18 @@ public class NeuralNetwork {
 	}
 
 	public void trainStep(List<Double> init, List<Double> expected) {
+		int col = network.size()-1;
+		int i = 0;
+		double pass = 0;
+		for (i; i<network.get(col).size(); i++) {
+			pass = network.get(col).get(i).getOutput();
+			network.get(col).get(i).setErrorSignal((pass-expected.get(i))*pass*(1-pass));
 
+		}
+
+		for (col--; col>0; col--) {
+
+		}
 	}
 
 	private double phiprime(double x) {

@@ -2,13 +2,19 @@ import java.util.*;
 
 public class Perceptron {
 	private List<Double> weights;
+	private double output;
+	private double errorSignal;
 
 	public Perceptron() {
 		weights = new ArrayList<Double>(0);
+		double output = 0;
+		double errorSignal = 0;
 	}
 
 	public Perceptron(ArrayList<Double> weightList) {
 		weights = weightList;
+		double output = 0;
+		double errorSignal = 0;
 	}
 
 	public Perceptron(int size) {
@@ -16,6 +22,24 @@ public class Perceptron {
 		for (int i = 0; i < size; i++) {
 			weights.add(1.0/((double)size));
 		}
+		double output = 0;
+		double errorSignal = 0;
+	}
+
+	public void setOutput(double ou) {
+		output = ou;
+	}
+
+	public double getOutput() {
+		return output;
+	}
+
+	public void setErrorSignal(double es) {
+		errorSignal = es;
+	}
+
+	public double getErrorSignal() {
+		return errorSignal;
 	}
 
 	public List<Double> getWeights() {
