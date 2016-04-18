@@ -16,7 +16,7 @@ public class NeuralNetwork {
 			}
 			else {
 				for (int j = 0; j < sizes.get(i); j++) {
-					col.add(new Perceptron(sizes.get(i-1));
+					col.add(new Perceptron(sizes.get(i-1)));
 				}				
 			}
 			network.add(col);
@@ -63,11 +63,14 @@ public class NeuralNetwork {
 	public void trainStep(List<Double> init, List<Double> expected) {
 		int col = network.size()-1;
 		int i = 0;
+		int j = 0;
 		double pass = 0;
-		for (i; i<network.get(col).size(); i++) {
+		for (i=0; i<network.get(col).size(); i++) {
 			pass = network.get(col).get(i).getOutput();
 			network.get(col).get(i).setErrorSignal((pass-expected.get(i))*pass*(1-pass));
-
+			for (j=0; j < network.get(col-1).size(); j++) {
+				network.get(col).get(i).changeWeight(j,-learningRate*network.get(col).get(i).getErrorSignal()*network.get(col-1).get(j).getOutput());
+			}
 		}
 
 		for (col--; col>0; col--) {
