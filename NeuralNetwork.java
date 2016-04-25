@@ -64,7 +64,9 @@ public class NeuralNetwork {
 		int col = network.size()-1;
 		int i = 0;
 		int j = 0;
+		int input = 0;
 		double pass = 0;
+		double totalPass = 0;
 		for (i=0; i<network.get(col).size(); i++) {
 			pass = network.get(col).get(i).getOutput();
 			network.get(col).get(i).setErrorSignal((pass-expected.get(i))*pass*(1-pass));
@@ -74,7 +76,18 @@ public class NeuralNetwork {
 		}
 
 		for (col--; col>0; col--) {
-
+			for (i=0; i<network.get(col).size(); i++) {
+				input = network.get(col).get(i).getWeights().size();
+				pass = network.get(col).get(i).getOutput();
+				totalPass = 0;
+				for (j=0; j < network.get(col+1).size(); j++) {
+					totalPass += network.get(col+1).get(j).getErrorSignal()*network.get(col+1).get(j).getWeight(i);
+				}
+				network.get(col).get(i).setErrorSignal(totalPass*pass*(1-pass));
+				for (j=0; j < input; j++) {
+					network.get(col).get(i).changeWeight(j,-learningRate*network.get(col).get(i).getErrorSignal()*network.get(col-1).get(j).getOutput());
+				}
+			}
 		}
 	}
 
