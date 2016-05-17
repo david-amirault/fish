@@ -16,6 +16,7 @@ public abstract class Game
         // not in this half-suit
         if (players.get(q.asker()).halfsuits()[q.card().code()] == 0)
             return -1;
+
         int id = q.target();
         // they actually have it
         if (players.get(q.target()).gotdem(q.card()))
@@ -34,6 +35,26 @@ public abstract class Game
 
     private int evaluateDeclaration(Declaration d)
     {
+        d.setWork(true);
+        for (int i = 0; i < 6; i++)
+        {
+            Question q = d.getQuestion(i);
+            // declares for the other team
+            if (q.asker() % 2 != q.target() % 2)
+                return -1;
+            // incorrect declaration
+            if (!players.get(q.target()).gotdem(q.card()))
+                d.setWork(false);
+
+            for (Player p : players)
+            {
+                if (p.gotdem(q.card()))
+                {
+                    p.lose(q.card());
+                    break;
+                }
+            }
+        }
     }
 
     public Game(List<Player> p, List<Controller> c)
