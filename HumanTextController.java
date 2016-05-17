@@ -4,24 +4,12 @@ public class HumanTextController extends Controller
 {
     private Scanner keyboard;
     private int[] score;
-    private int id;
 
-    public HumanTextController(int i)
+    public HumanTextController(Player p)
     {
+        super(p);
         keyboard = new Scanner(System.in);
         score = new int[2];
-        id = i;
-    }
-
-    @Override
-    public void hearQuestion(Question q)
-    {
-        String msg = "Player " + q.asker() + " asks Player " + q.target() + " for the " + q.card() + ".\n";
-        if (q.worked())
-            msg += "Correct!\n";
-        else
-            msg += "Go fish!\n";
-        System.out.println(msg);
     }
 
     @Override
@@ -52,9 +40,21 @@ public class HumanTextController extends Controller
     }
 
     @Override
+    public void hearQuestion(Question q)
+    {
+        String msg = "Player " + q.asker() + " asks Player " + q.target() + " for the " + q.card() + ".\n";
+        if (q.worked())
+            msg += "Correct!\n";
+        else
+            msg += "Go fish!\n";
+        System.out.println(msg);
+    }
+
+    @Override
     public Declaration declare(boolean must)
     {
         Declaration dec = new Declaration();
+        System.out.print("\n" + super.player().toString());
         if (!must)
         {
             System.out.print("Declare (y/n)? ");
@@ -63,6 +63,7 @@ public class HumanTextController extends Controller
         }
         else
             System.out.println("You must declare!");
+
         for (int i = 0; i < 6; i++)
         {
             System.out.print("Enter teammate: ");
@@ -74,15 +75,15 @@ public class HumanTextController extends Controller
             System.out.print("Upper half-suit (true/false)? ");
             boolean h = keyboard.nextBoolean();
             Card c = new Card(r, s, h);
-            dec.addQuestion(new Question(id, t, c));
+            dec.addQuestion(new Question(super.player().id(), t, c));
         }
-
         return dec;
     }
 
     @Override
     public Question ask()
     {
+        System.out.print("\n" + super.player().toString());
         System.out.print("Enter target player: ");
         int t = keyboard.nextInt();
         System.out.print("Enter card rank: ");
@@ -92,6 +93,6 @@ public class HumanTextController extends Controller
         System.out.print("Upper half-suit (true/false)? ");
         boolean h = keyboard.nextBoolean();
         Card c = new Card(r, s, h);
-        return new Question(id, t, c);
+        return new Question(super.player().id(), t, c);
     }
 }

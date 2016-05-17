@@ -27,6 +27,11 @@ public class Player
         id = i;
     }
 
+    public List<Card> hand() { return hand; }
+    public int size() { return hand.size(); }
+    public int[] halfsuits() { return halfsuits; }
+    public int id() { return id; }
+
     public boolean gotdem(Card other)
     {
         return hand.contains(other);
@@ -50,16 +55,6 @@ public class Player
         return hand.size() == 0;
     }
 
-    public int size()
-    {
-        return hand.size();
-    }
-
-    public int[] halfsuits()
-    {
-        return halfsuits;
-    }
-
     @Override
     public String toString()
     {
@@ -72,7 +67,6 @@ public class Player
             if ((size() - k) % 2 == 0)
                 rtn += "\n";
         }
-
         return rtn;
     }
 }
