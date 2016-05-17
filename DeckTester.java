@@ -3,11 +3,11 @@
  */
 public class DeckTester {
 
-	/**
-	 * The main method in this class checks the Deck operations for consistency.
-	 *	@param args is not used.
-	 */
-	public static void main(String[] args) {
+    /**
+     * The main method in this class checks the Deck operations for consistency.
+     *  @param args is not used.
+     */
+    public static void main(String[] args) {
         String[] normalranks = {"2", "3", "4", "5", "6", "7", "9", "10", "Jack", "Queen", "King", "Ace"};
         String[] normalsuits = {"Clubs", "Diamonds", "Hearts", "Spades"};
         String[] smallranks = {"A", "B", "C"};
@@ -50,5 +50,5 @@ public class DeckTester {
         System.out.println(jackson.isEmpty());
         System.out.println(jackson.toString());
         System.out.print('\n');
-	}
+    }
 }
