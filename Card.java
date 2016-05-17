@@ -64,13 +64,13 @@ public class Card {
     }
 
     public boolean isCard() {
-        if (suit != “Clubs” && suit != “Diamonds” && suit != “Hearts” && suit != “Spades”)
+        if (suit != "Clubs" && suit != "Diamonds" && suit != "Hearts" && suit != "Spades")
             return false;
 
-        if (((rank != “2” && rank != “3” && rank != “4” && rank != “5” &&
-              rank != “6” && rank != “7”) || highHalf) &&
-            ((rank != “9” && rank != “10” && rank != “Jack” && rank != “Queen” &&
-              rank != “King” && rank != “Ace”) || !highHalf))
+        if (((rank != "2" && rank != "3" && rank != "4" &&
+              rank != "5" && rank != "6" && rank != "7") || highHalf) &&
+            ((rank != "9" && rank != "10" && rank != "Jack" &&
+              rank != "Queen" && rank != "King" && rank != "Ace") || !highHalf))
             return false;
 
         return true;
