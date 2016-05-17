@@ -5,7 +5,7 @@ public class Player
 {
     private List<Card> hand;
     // the player's cards, distributed by half-suit
-    // key (ordered low to high, alphabetically):
+    // indices: (ordered low to high, alphabetically)
     // low clubs        = 0
     // high clubs       = 1
     // low diamonds     = 2
@@ -20,11 +20,11 @@ public class Player
     // fish is played 3v3, evens v. odds
     private int id;
 
-    public Player(int playerNo)
+    public Player(int i)
     {
         hand = new ArrayList<Card>();
         halfsuits = new int[8];
-        id = playerNo;
+        id = i;
     }
 
     public boolean gotdem(Card other)
@@ -55,10 +55,15 @@ public class Player
         return hand.size();
     }
 
+    public int[] halfsuits()
+    {
+        return halfsuits;
+    }
+
     @Override
     public String toString()
     {
-        String rtn = "size = " + size() + "\n";
+        String rtn = "Player " + id + "\n";
         for (int k = size() - 1; k >= 0; k--)
         {
             rtn += hand.get(k);
@@ -68,9 +73,6 @@ public class Player
                 rtn += "\n";
         }
 
-        for (int i = 0; i < 8; i++)
-            rtn += halfsuits[i] + "\n";
-
-        return "\n" + rtn;
+        return rtn;
     }
 }

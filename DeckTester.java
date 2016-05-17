@@ -8,7 +8,7 @@ public class DeckTester {
 	 *	@param args is not used.
 	 */
 	public static void main(String[] args) {
-        String[] normalranks = {"Ace", "2", "3", "4", "5", "6", "7", "9", "10", "Jack", "Queen", "King"};
+        String[] normalranks = {"2", "3", "4", "5", "6", "7", "9", "10", "Jack", "Queen", "King", "Ace"};
         String[] normalsuits = {"Clubs", "Diamonds", "Hearts", "Spades"};
         String[] smallranks = {"A", "B", "C"};
         String[] smallsuits = {"Giraffes", "Lions"};

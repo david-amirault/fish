@@ -6,14 +6,14 @@
 public class Card {
 
 	/**
-	 * String value that holds the suit of the card
-	 */
-	private String suit;
-
-	/**
 	 * String value that holds the rank of the card
 	 */
 	private String rank;
+
+	/**
+	 * String value that holds the suit of the card
+	 */
+	private String suit;
 
 	/**
 	 * boolean value that holds the half-suit of the card
@@ -40,19 +40,19 @@ public class Card {
 
 
 	/**
-	 * Accesses this <code>Card's</code> suit.
-	 * @return this <code>Card's</code> suit.
-	 */
-	public String suit() {
-		return suit;
-	}
-
-	/**
 	 * Accesses this <code>Card's</code> rank.
 	 * @return this <code>Card's</code> rank.
 	 */
 	public String rank() {
 		return rank;
+	}
+
+	/**
+	 * Accesses this <code>Card's</code> suit.
+	 * @return this <code>Card's</code> suit.
+	 */
+	public String suit() {
+		return suit;
 	}
 
    /**
