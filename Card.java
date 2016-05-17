@@ -63,13 +63,43 @@ public class Card {
 		return highHalf;
 	}
 
+    // key (ordered low to high, alphabetically):
+    // low clubs        = 0
+    // high clubs       = 1
+    // low diamonds     = 2
+    // high diamonds    = 3
+    // low hearts       = 4
+    // high hearts      = 5
+    // low spades       = 6
+    // high spades      = 7
+    public int code() {
+        int base = 0; // Clubs
+        if (suit.equals("Diamonds"))
+            base = 2;
+        if (suit.equals("Hearts"))
+            base = 4;
+        if (suit.equals("Spades"))
+            base = 6;
+        if (highHalf)
+            base++;
+        return base;
+    }
+
+
 	/** Compare this card with the argument.
 	 * @param otherCard the other card to compare to this
 	 * @return true if the rank, suit, and half-suit of this card
 	 *              are equal to those of the argument;
 	 *         false otherwise.
 	 */
-	public boolean matches(Card otherCard) {
+    @Override
+	public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (!Card.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final Card otherCard = (Card) obj;
 		return otherCard.suit().equals(this.suit())
 			&& otherCard.rank().equals(this.rank())
 			&& otherCard.highHalf() == this.highHalf();
