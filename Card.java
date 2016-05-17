@@ -6,14 +6,14 @@
 public class Card {
 
 	/**
-	 * String value that holds the suit of the card
-	 */
-	private String suit;
-
-	/**
 	 * String value that holds the rank of the card
 	 */
 	private String rank;
+
+	/**
+	 * String value that holds the suit of the card
+	 */
+	private String suit;
 
 	/**
 	 * boolean value that holds the half-suit of the card
@@ -40,19 +40,19 @@ public class Card {
 
 
 	/**
-	 * Accesses this <code>Card's</code> suit.
-	 * @return this <code>Card's</code> suit.
-	 */
-	public String suit() {
-		return suit;
-	}
-
-	/**
 	 * Accesses this <code>Card's</code> rank.
 	 * @return this <code>Card's</code> rank.
 	 */
 	public String rank() {
 		return rank;
+	}
+
+	/**
+	 * Accesses this <code>Card's</code> suit.
+	 * @return this <code>Card's</code> suit.
+	 */
+	public String suit() {
+		return suit;
 	}
 
    /**
@@ -63,13 +63,43 @@ public class Card {
 		return highHalf;
 	}
 
+    // key (ordered low to high, alphabetically):
+    // low clubs        = 0
+    // high clubs       = 1
+    // low diamonds     = 2
+    // high diamonds    = 3
+    // low hearts       = 4
+    // high hearts      = 5
+    // low spades       = 6
+    // high spades      = 7
+    public int code() {
+        int base = 0; // Clubs
+        if (suit.equals("Diamonds"))
+            base = 2;
+        if (suit.equals("Hearts"))
+            base = 4;
+        if (suit.equals("Spades"))
+            base = 6;
+        if (highHalf)
+            base++;
+        return base;
+    }
+
+
 	/** Compare this card with the argument.
 	 * @param otherCard the other card to compare to this
 	 * @return true if the rank, suit, and half-suit of this card
 	 *              are equal to those of the argument;
 	 *         false otherwise.
 	 */
-	public boolean matches(Card otherCard) {
+    @Override
+	public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (!Card.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final Card otherCard = (Card) obj;
 		return otherCard.suit().equals(this.suit())
 			&& otherCard.rank().equals(this.rank())
 			&& otherCard.highHalf() == this.highHalf();

@@ -31,7 +31,21 @@ public class NeuralNetwork {
 		return learningRate;
 	}
 
-	public List<Double> out(List<Double> init) {
+	public List<Double> doOut(List<Double> init) {
+		List<Double> outArray = init;
+		List<Double> dummyArray;
+		double pass = 0;
+		for (int col = 0; col < network.size(); col++) {
+			dummyArray = new ArrayList<Double>(network.get(col).size());
+			for (int i = 0; i < network.get(col).size(); i++) {
+				dummyArray.add(network.get(col).get(i).out(outArray));
+			}
+			outArray = dummyArray;
+		}
+		return outArray;
+	}
+
+	public void out(List<Double> init) {
 		List<Double> outArray = init;
 		List<Double> dummyArray;
 		double pass = 0;
@@ -44,7 +58,6 @@ public class NeuralNetwork {
 			}
 			outArray = dummyArray;
 		}
-		return outArray;
 	}
 
 	private double error(int nodeId, List<Double> init, List<Double> expected) {
@@ -67,27 +80,49 @@ public class NeuralNetwork {
 		int input = 0;
 		double pass = 0;
 		double totalPass = 0;
-		for (i=0; i<network.get(col).size(); i++) {
-			pass = network.get(col).get(i).getOutput();
-			network.get(col).get(i).setErrorSignal((pass-expected.get(i))*pass*(1-pass));
-			for (j=0; j < network.get(col-1).size(); j++) {
-				network.get(col).get(i).changeWeight(j,-learningRate*network.get(col).get(i).getErrorSignal()*network.get(col-1).get(j).getOutput());
-			}
-		}
-
-		for (col--; col>0; col--) {
+		if (col>0) {
 			for (i=0; i<network.get(col).size(); i++) {
-				input = network.get(col).get(i).getWeights().size();
 				pass = network.get(col).get(i).getOutput();
-				totalPass = 0;
-				for (j=0; j < network.get(col+1).size(); j++) {
-					totalPass += network.get(col+1).get(j).getErrorSignal()*network.get(col+1).get(j).getWeight(i);
-				}
-				network.get(col).get(i).setErrorSignal(totalPass*pass*(1-pass));
-				for (j=0; j < input; j++) {
+				network.get(col).get(i).setErrorSignal((pass-expected.get(i))*pass*(1-pass));
+				for (j=0; j < network.get(col-1).size(); j++) {
 					network.get(col).get(i).changeWeight(j,-learningRate*network.get(col).get(i).getErrorSignal()*network.get(col-1).get(j).getOutput());
 				}
 			}
+
+			for (col--; col>0; col--) {
+				for (i=0; i<network.get(col).size(); i++) {
+					input = network.get(col).get(i).getWeights().size();
+					pass = network.get(col).get(i).getOutput();
+					totalPass = 0;
+					for (j=0; j < network.get(col+1).size(); j++) {
+						totalPass += network.get(col+1).get(j).getErrorSignal()*network.get(col+1).get(j).getWeight(i);
+					}
+					network.get(col).get(i).setErrorSignal(totalPass*pass*(1-pass));
+					for (j=0; j < input; j++) {
+						network.get(col).get(i).changeWeight(j,-learningRate*network.get(col).get(i).getErrorSignal()*network.get(col-1).get(j).getOutput());
+					}
+				}
+			}
+		}
+		
+		for (i=0; i < network.get(0).size(); i++) {
+			input = network.get(0).get(i).getWeights().size();
+			pass = network.get(col).get(i).getOutput();
+			totalPass = 0;
+			for (j=0; j < network.get(1).size(); j++) {
+				totalPass += network.get(1).get(j).getErrorSignal()*network.get(1).getWeight(i);
+			}
+			network.get(0).get(i).setErrorSignal(totalPass*pass*(1-pass));
+			for (j=0; j<input; j++) {
+				network.get(0).get(i).changeWeight(j,-learningRate*network.get(0).get(i).getErrorSignal()*init.get(j));
+			}
+		}
+	}
+
+	public void train(List<List<Double>> inputs, List<List<Double>> expected) {
+		for (int i = 0; i < inputs.size(); i++) {
+			out(inputs.get(i));
+			trainStep(inputs.get(i), expected.get(i));
 		}
 	}
 
