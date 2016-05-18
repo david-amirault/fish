@@ -3,6 +3,7 @@ import java.util.ArrayList;
 
 public class Game
 {
+    private final boolean debugging = true;
     private List<Controller> controllers;
     private int[] score;
 
@@ -28,6 +29,9 @@ public class Game
             // declares for the other team
             if (q.asker() % 2 != q.target() % 2)
                 return -1;
+            // not a half-suit
+            if (i < 5 && q.card().code() != d.getQuestion(i + 1).card().code())
+                    return -1;
 
             if (!controllers.get(q.target()).player().gotdem(q.card()))
                 d.setWork(false);
@@ -36,6 +40,7 @@ public class Game
             {
                 if (c.player().gotdem(q.card()))
                 {
+                    d.getQuestion(i).setHold(c.player().id());
                     c.player().lose(q.card());
                     break;
                 }
@@ -99,18 +104,33 @@ public class Game
         int id = 0, tmp;
         while (true)
         {
-            try
+            if (debugging)
             {
-                Thread.sleep(3000);
+                System.out.println();
+                for (Controller con : controllers)
+                    System.out.print(con.player().toString());
             }
-            catch (InterruptedException ex)
+            else
             {
-                Thread.currentThread().interrupt();
+                try
+                {
+                    Thread.sleep(3000);
+                }
+                catch (InterruptedException ex)
+                {
+                    Thread.currentThread().interrupt();
+                }
             }
             tmp = evaluateDeclaration(controllers.get(id).declare(teamOut(id + 1)));
             while (tmp == -1 || (tmp == 6 && teamOut(id + 1)))
             {
                 System.out.println("Invalid Declaration!");
+                if (debugging)
+                {
+                    System.out.println();
+                    for (Controller con : controllers)
+                        System.out.print(con.player().toString());
+                }
                 tmp = evaluateDeclaration(controllers.get(id).declare(teamOut(id + 1)));
             }
             if (tmp != 6)
@@ -122,10 +142,22 @@ public class Game
                 continue;
             }
 
+            if (debugging)
+            {
+                System.out.println();
+                for (Controller con : controllers)
+                    System.out.print(con.player().toString());
+            }
             tmp = evaluateQuestion(controllers.get(id).ask());
             while (tmp == -1)
             {
                 System.out.println("Invalid Question!");
+                if (debugging)
+                {
+                    System.out.println();
+                    for (Controller con : controllers)
+                        System.out.print(con.player().toString());
+                }
                 tmp = evaluateQuestion(controllers.get(id).ask());
             }
             id = tmp;

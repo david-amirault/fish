@@ -5,12 +5,14 @@ public class AIDummyController extends Controller
 {
     private String[] ranks = {"2", "3", "4", "5", "6", "7", "9", "10", "Jack", "Queen", "King", "Ace"};
     private Random rng;
+    private int declareCount;
     private int[] handSizes;
 
     public AIDummyController(Player p)
     {
         super(p);
         rng = new Random();
+        declareCount = 0;
         handSizes = new int[6];
         for (int i = 0; i < 6; i++)
             handSizes[i] = 8;
@@ -19,6 +21,7 @@ public class AIDummyController extends Controller
     @Override
     public void hearQuestion(Question q)
     {
+        declareCount++;
         if (q.worked())
         {
             handSizes[q.asker()]++;
@@ -29,6 +32,7 @@ public class AIDummyController extends Controller
     @Override
     public void hearDeclaration(Declaration d)
     {
+        declareCount = 0;
         for (int i = 0; i < 6; i++)
             handSizes[d.getQuestion(i).holder()]--;
     }
@@ -56,7 +60,7 @@ public class AIDummyController extends Controller
             return dec;
         }
 
-        if (!must)
+        if ((!must) && declareCount < 50 + rng.nextInt(1)) // to keep things interesting
             return dec;
 
         int startRank = (loc % 2) * 6;
@@ -115,6 +119,9 @@ public class AIDummyController extends Controller
         while (super.player().gotdem(new Card(ranks[startRank], startSuit, startHighHalf)))
             startRank++;
 
-        return new Question(super.player().id(), (super.player().id() + 1 + 2 * rng.nextInt(3)) % 6, new Card(ranks[startRank], startSuit, startHighHalf));
+        int enemy = (super.player().id() + 1 + 2 * rng.nextInt(3)) % 6;
+        while (handSizes[enemy] == 0)
+            enemy = (enemy + 2 * (1 + rng.nextInt(1))) % 6;
+        return new Question(super.player().id(), enemy, new Card(ranks[startRank], startSuit, startHighHalf));
     }
 }

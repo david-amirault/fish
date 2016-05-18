@@ -54,7 +54,7 @@ public class HumanTextController extends Controller
     public Declaration declare(boolean must)
     {
         Declaration dec = new Declaration();
-        System.out.print("\n" + super.player().toString());
+        //System.out.print("\n" + super.player().toString());
         if (!must)
         {
             System.out.print("Declare (y/n)? ");
@@ -83,7 +83,7 @@ public class HumanTextController extends Controller
     @Override
     public Question ask()
     {
-        System.out.print("\n" + super.player().toString());
+        //System.out.print("\n" + super.player().toString());
         System.out.print("Enter target player: ");
         int t = keyboard.nextInt();
         System.out.print("Enter card rank: ");

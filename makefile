@@ -3,6 +3,9 @@
 SinglePlayerGame.class: SinglePlayerGame.java Game.class HumanTextController.class AIDummyController.class Deck.class
 	javac SinglePlayerGame.java
 
+AIDummyGame.class: AIDummyGame.java Game.class AIDummyController.class Deck.class
+	javac AIDummyGame.java
+
 PlayerTester.class: PlayerTester.java Player.class Deck.class
 	javac PlayerTester.java
 
