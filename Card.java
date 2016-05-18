@@ -1,3 +1,5 @@
+import java.util.*;
+
 /**
  * Card.java
  *
@@ -38,6 +40,23 @@ public class Card {
         highHalf = cardHighHalf;
     }
 
+    public Card(String cardRank, String cardSuit) {
+        //find half-suit given rank and suit
+        rank = cardRank;
+        suit = cardSuit;
+        highHalf = true;
+        try {
+            if (Integer.parseInt(cardRank)<8) {
+                highHalf = false;
+            }
+            else {
+                highHalf = true;
+            }
+        }
+        catch (NumberFormatException nfe) {
+            highHalf = true;
+        }
+    }
 
     /**
      * Accesses this <code>Card's</code> rank.
