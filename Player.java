@@ -64,7 +64,7 @@ public class Player
             rtn += hand.get(k);
             if (k != 0)
                 rtn += ", ";
-            if ((size() - k) % 2 == 0)
+            if ((size() - k) % 2 == 0 || k == 0)
                 rtn += "\n";
         }
         return rtn;
