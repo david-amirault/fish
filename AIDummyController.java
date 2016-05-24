@@ -60,7 +60,7 @@ public class AIDummyController extends Controller
             return dec;
         }
 
-        if ((!must) && declareCount < 50 + rng.nextInt(1)) // to keep things interesting
+        if ((!must) && declareCount < 50 + rng.nextInt(10)) // to keep things interesting
             return dec;
 
         int startRank = (loc % 2) * 6;

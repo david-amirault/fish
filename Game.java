@@ -5,7 +5,6 @@ public class Game
 {
     private final boolean debugging = true;
     private List<Controller> controllers;
-    private int[] score;
 
     private boolean teamOut(int i)
     {
@@ -20,6 +19,7 @@ public class Game
             return 6; // code for not declaring
 
         d.setWork(true);
+        // check validity of declaration
         for (int i = 0; i < 6; i++)
         {
             Question q = d.getQuestion(i);
@@ -36,24 +36,34 @@ public class Game
             if (!controllers.get(q.target()).player().gotdem(q.card()))
                 d.setWork(false);
 
-            for (Controller c : controllers)
+        }
+        int id = d.getQuestion(0).asker();
+        if (d.worked())
+        {
+            // remove cards
+            for (int i = 0; i < 6; i++)
             {
-                if (c.player().gotdem(q.card()))
+                Question q = d.getQuestion(i);
+                for (Controller c : controllers)
                 {
-                    d.getQuestion(i).setHold(c.player().id());
-                    c.player().lose(q.card());
-                    break;
+                    if (c.player().gotdem(q.card()))
+                    {
+                        d.getQuestion(i).setHold(c.player().id());
+                        c.player().lose(q.card());
+                        break;
+                    }
                 }
             }
+            for (Controller c : controllers)
+                c.player().point(id);
+        }
+        else
+        {
+            for (Controller c : controllers)
+                c.player().point(id + 1);
         }
         for (Controller c : controllers)
             c.hearDeclaration(d);
-
-        int id = d.getQuestion(0).asker();
-        if (d.worked())
-            score[id % 2]++;
-        else
-            score[(id + 1) % 2]++;
 
         if (teamOut(id))
             id = (id + 1) % 6;
@@ -100,7 +110,6 @@ public class Game
     public Game(List<Controller> c)
     {
         controllers = c;
-        score = new int[2];
         int id = 0, tmp;
         while (true)
         {
@@ -162,6 +171,6 @@ public class Game
             }
             id = tmp;
         }
-        System.out.print("\nGood game!\nScore: " + score[0] + " to " + score[1] + ".");
+        System.out.print("\nGood game!\nScore: " + controllers.get(0).player().score()[0] + " to " + controllers.get(0).player().score()[1] + ".");
     }
 }

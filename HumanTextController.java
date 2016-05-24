@@ -3,13 +3,11 @@ import java.util.Scanner;
 public class HumanTextController extends Controller
 {
     private Scanner keyboard;
-    private int[] score;
 
     public HumanTextController(Player p)
     {
         super(p);
         keyboard = new Scanner(System.in);
-        score = new int[2];
     }
 
     @Override
@@ -26,16 +24,11 @@ public class HumanTextController extends Controller
             msg += "Player " + d.getQuestion(i).holder() + " has the " + d.getQuestion(i).card() + ".\n";
 
         if (d.worked())
-        {
             msg += "Correct!\n";
-            score[d.getQuestion(0).asker() % 2]++;
-        }
         else
-        {
             msg += "Incorrect!\n";
-            score[d.getQuestion(0).target() % 2]++;
-        }
-        msg += "Score: " + score[0] + " to " + score[1] + ".\n";
+
+        msg += "Score: " + super.player().score()[0] + " to " + super.player().score()[1] + ".\n";
         System.out.println(msg);
     }
 
