@@ -43,7 +43,7 @@ public class HumanTextController extends Controller
 
         for (int i = 0; i < 6; i++)
         {
-            System.out.print("Enter teammate: ");
+            System.out.print("Enter teammate id: ");
             int t = keyboard.nextInt();
             System.out.print("Enter card rank: ");
             String r = keyboard.next();
@@ -61,7 +61,7 @@ public class HumanTextController extends Controller
         if (!debugging)
             System.out.print("\n" + super.player().toString());
 
-        System.out.print("Enter target player: ");
+        System.out.print("Enter enemy id: ");
         int t = keyboard.nextInt();
         System.out.print("Enter card rank: ");
         String r = keyboard.next();

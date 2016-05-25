@@ -24,9 +24,9 @@ public class Declaration
         worked = w;
     }
 
-    public boolean noGuess()
+    public int size()
     {
-        return guess.size() == 0;
+        return guess.size();
     }
 
     public void addQuestion(Question q)

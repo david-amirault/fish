@@ -24,14 +24,12 @@ public class HumanGUIController extends Controller
     @Override
     public Declaration declare(boolean must)
     {
-        Declaration dec = new Declaration();
-        return dec;
+        return gui.declare(must);
     }
 
     @Override
     public Question ask()
     {
-        Card c = new Card("Ace", "Spades");
-        return new Question(super.player().id(), 1, c);
+        return gui.ask();
     }
 }

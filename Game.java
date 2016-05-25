@@ -15,8 +15,11 @@ public class Game
 
     private int evaluateDeclaration(Declaration d)
     {
-        if (d.noGuess())
+        if (d.size() == 0)
             return 6; // code for not declaring
+
+        if (d.size() != 6)
+            return -1;
 
         d.setWork(true);
         // check validity of declaration

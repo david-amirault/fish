@@ -1,27 +1,14 @@
-import java.awt.Point;
-import java.awt.Graphics;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Color;
-import java.awt.Toolkit;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseEvent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.ImageIcon;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 import java.net.URL;
 import java.util.List;
 import java.util.ArrayList;
-import java.lang.Boolean;
 
 /**
  * This class provides a GUI for solitaire games related to Elevens.
  */
-public class FishGUI extends JFrame implements ActionListener {
+public class FishGUI extends JFrame {
 
 	/** Height of the game frame. */
 	private static final int DEFAULT_HEIGHT = 302;
@@ -41,6 +28,8 @@ public class FishGUI extends JFrame implements ActionListener {
 	/** Distance between the upper left y coords of
 	 *  two vertically adjacent cards. */
 	private static final int LAYOUT_HEIGHT_INC = 125;
+    /** Height of the text box. */
+    private static final int TEXT_HEIGHT = 50;
 	/** y coord of the "Replace" button. */
 	private static final int BUTTON_TOP = 30;
 	/** x coord of the "Replace" button. */
@@ -58,6 +47,8 @@ public class FishGUI extends JFrame implements ActionListener {
     /** The player (Player subclass). */
     private Player player;
 
+    /** For new card inputs. */
+    private JTextField textField;
 	/** The main panel containing the game components. */
 	private JPanel panel;
 	/** The Replace button. */
@@ -68,17 +59,19 @@ public class FishGUI extends JFrame implements ActionListener {
 	private JLabel statusMsg;
 	/** The "you've won n out of m games" message. */
 	private JLabel totalsMsg;
-	/** The card displays. */
-	private List<JLabel> displayCards;
 	/** The win message. */
 	private JLabel winMsg;
 	/** The loss message. */
 	private JLabel lossMsg;
+
+	/** The card displays. */
+	private List<JLabel> displayCards;
 	/** The coordinates of the card displays. */
 	private List<Point> cardCoords;
-
-	/** kth element is true iff the user has selected card #k. */
-	private List<Boolean> selections;
+	/** contains k iff the user has selected card #k. */
+	private List<Integer> selections;
+    /** to wait for a keypress. */
+    private boolean entered;
 
 
 	/**
@@ -87,16 +80,9 @@ public class FishGUI extends JFrame implements ActionListener {
 	 */
 	public FishGUI(Player p) {
         player = p;
-
+		displayCards = new ArrayList<JLabel>();
 		cardCoords = new ArrayList<Point>();
-		int x = LAYOUT_LEFT;
-		int y = LAYOUT_TOP;
-        selections = new ArrayList<Boolean>();
-		for (int i = 0; i < player.size(); i++) {
-			cardCoords.add(new Point(x, y));
-            x += LAYOUT_WIDTH_INC;
-            selections.add(new Boolean(false));
-		}
+        selections = new ArrayList<Integer>();
 
 		initDisplay();
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -119,33 +105,45 @@ public class FishGUI extends JFrame implements ActionListener {
      */
     public void status(String msg) {
         statusMsg.setText(msg);
+        repaint();
     }
 
 	/**
 	 * Draw the display (cards and messages).
 	 */
 	public void repaint() {
-		displayCards = new ArrayList<JLabel>();
-		for (int k = player.size() - 1; k > 0; k--) {
-			displayCards.add(new JLabel());
-			panel.add(displayCards.get(k));
-			displayCards.get(k).setBounds(cardCoords.get(k).x, cardCoords.get(k).y, CARD_WIDTH, CARD_HEIGHT);
-			displayCards.get(k).addMouseListener(new MyMouseListener());
-			selections.set(k, new Boolean(false));
+		cardCoords.clear();
+		int x = LAYOUT_LEFT;
+		int y = LAYOUT_TOP;
+		for (int i = 0; i < player.size(); i++) {
+			cardCoords.add(new Point(x, y));
+            x += LAYOUT_WIDTH_INC;
 		}
 
-		for (int k = player.size() - 1; k > 0; k--) {
-			String cardImageFileName = imageFileName(player.hand().get(k), selections.get(k).booleanValue());
+        for (int i = 0; i < displayCards.size(); i++)
+            panel.remove(displayCards.get(i));
+
+		displayCards.clear();
+		for (int k = player.size() - 1; k >= 0; k--) {
+			displayCards.add(new JLabel());
+            int b = displayCards.size() - 1;
+			panel.add(displayCards.get(b));
+			displayCards.get(b).setBounds(cardCoords.get(k).x, cardCoords.get(k).y, CARD_WIDTH, CARD_HEIGHT);
+			displayCards.get(b).addMouseListener(new MyMouseListener());
+		}
+
+		for (int k = 0; k < player.size(); k++) {
+			String cardImageFileName = imageFileName(player.hand().get(k), selections.contains(new Integer(k)));
 			URL imageURL = getClass().getResource(cardImageFileName);
 			if (imageURL != null) {
 				ImageIcon icon = new ImageIcon(imageURL);
 				displayCards.get(k).setIcon(icon);
 				displayCards.get(k).setVisible(true);
 			} else {
-				throw new RuntimeException(
-					"Card image not found: \"" + cardImageFileName + "\"");
+				throw new RuntimeException("Card image not found: \"" + cardImageFileName + "\"");
 			}
 		}
+
 		statusMsg.setVisible(true);
 		totalsMsg.setText("Score: " + player.score()[0] + " to " + player.score()[1] + ".");
 		totalsMsg.setVisible(true);
@@ -170,23 +168,25 @@ public class FishGUI extends JFrame implements ActionListener {
 		panel.setPreferredSize(new Dimension(DEFAULT_WIDTH - 20, DEFAULT_HEIGHT - 20));
 
 		replaceButton = new JButton();
-		replaceButton.setText("Declare");
+		replaceButton.setText("Ask");
 		panel.add(replaceButton);
 		replaceButton.setBounds(BUTTON_LEFT, BUTTON_TOP, 100, 30);
-		replaceButton.addActionListener(this);
 
 		restartButton = new JButton();
-		restartButton.setText("Ask");
+		restartButton.setText("Declare");
 		panel.add(restartButton);
 		restartButton.setBounds(BUTTON_LEFT, BUTTON_TOP + BUTTON_HEIGHT_INC, 100, 30);
-		restartButton.addActionListener(this);
+
+        textField = new JTextField(20);
+        panel.add(textField);
+        textField.setBounds(LABEL_LEFT, LABEL_TOP, 160, 20);
 
 		statusMsg = new JLabel("Game started!");
 		panel.add(statusMsg);
-		statusMsg.setBounds(LABEL_LEFT, LABEL_TOP, 250, 30);
+		statusMsg.setBounds(LABEL_LEFT, LABEL_TOP + TEXT_HEIGHT, 250, 30);
 
 		winMsg = new JLabel();
-		winMsg.setBounds(LABEL_LEFT, LABEL_TOP + LABEL_HEIGHT_INC, 200, 30);
+		winMsg.setBounds(LABEL_LEFT, LABEL_TOP + TEXT_HEIGHT + LABEL_HEIGHT_INC, 200, 30);
 		winMsg.setFont(new Font("SansSerif", Font.BOLD, 25));
 		winMsg.setForeground(Color.GREEN);
 		winMsg.setText("You win!");
@@ -201,6 +201,7 @@ public class FishGUI extends JFrame implements ActionListener {
 		panel.add(lossMsg);
 		lossMsg.setVisible(false);
 
+        totalsMsg = new JLabel();
 		totalsMsg.setText("Score: " + player.score()[0] + " to " + player.score()[1] + ".");
 		totalsMsg.setBounds(LABEL_LEFT, LABEL_TOP + 2 * LABEL_HEIGHT_INC, 250, 30);
 		panel.add(totalsMsg);
@@ -247,30 +248,93 @@ public class FishGUI extends JFrame implements ActionListener {
 	 * or the "Restart" button).
 	 * @param e the button click action event
 	 */
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource().equals(replaceButton)) {
-			// DO DECLARATION STUFF
-			List<Integer> selection = new ArrayList<Integer>();
-			for (int k = 0; k < player.size(); k++) {
-				if (selections.get(k).booleanValue()) {
-					selection.add(new Integer(k));
-				}
-			}
-			for (int k = 0; k < player.size(); k++) {
-				selections.set(k, new Boolean(false));
-			}
-			repaint();
-		} else if (e.getSource().equals(restartButton)) {
-            // DO QUESTION STUFF
-			for (int i = 0; i < selections.size(); i++) {
-				selections.set(i, new Boolean(false));
-			}
-			repaint();
-		} else {
-			signalError();
-			return;
-		}
-	}
+    private String getText(String statusMsg) {
+        status(statusMsg);
+        entered = false;
+        textField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                textField.selectAll();
+                entered = true;
+            }
+        });
+        while (!entered) {
+            // chillax
+        }
+        return textField.getText();
+    }
+
+    private Question inputQuestion(String targetMsg, String suit) {
+        int t = Integer.parseInt(getText(targetMsg));
+        String r = getText("Enter card rank");
+        return new Question(player.id(), t, new Card(r, suit));
+    }
+
+    public Declaration declare(boolean must) {
+        Declaration dec = new Declaration();
+        entered = false;
+        replaceButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                selections.clear();
+                if (!must) {
+                    repaint();
+                    entered = true;
+                } else {
+                    status("You must declare!");
+                }
+
+            }
+        });
+        restartButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                for (int i = 0; i < selections.size(); i++)
+                {
+                    dec.addQuestion(new Question(player.id(), player.id(), player.hand().get(selections.get(i).intValue())));
+                    if (i > 0 && dec.getQuestion(i).card().code() != dec.getQuestion(i - 1).card().code()) {
+                        entered = true;
+                        break;
+                    }
+                }
+
+                if (dec.size() >= 6)
+                    entered = true;
+
+                if (!entered) {
+                    entered = true;
+                    String s;
+                    if (dec.size() == 0)
+                        s = getText("Enter declared suit");
+                    else
+                        s = dec.getQuestion(0).card().suit();
+
+                    while (dec.size() < 6)
+                        dec.addQuestion(inputQuestion("Enter teammate id", s));
+                }
+
+                selections.clear();
+                repaint();
+            }
+        });
+        while (!entered) {
+        }
+        return dec;
+    }
+
+    public Question ask() {
+        entered = false;
+        replaceButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (selections.size() != 1) {
+                    selections.clear();
+                    repaint();
+                } else {
+                    entered = true;
+                }
+            }
+        });
+        while (!entered) {
+        }
+        return inputQuestion("Enter enemy id", player.hand().get(selections.get(0).intValue()).suit());
+    }
 
 	/**
 	 * Display a win.
@@ -301,7 +365,11 @@ public class FishGUI extends JFrame implements ActionListener {
 		public void mouseClicked(MouseEvent e) {
 			for (int k = 0; k < player.size(); k++) {
 				if (e.getSource().equals(displayCards.get(k))) {
-					selections.set(k, new Boolean(!selections.get(k).booleanValue()));
+                    if (selections.contains(new Integer(k)))
+                        selections.remove(new Integer(k));
+                    else
+                        selections.add(new Integer(k));
+
 					repaint();
 					return;
 				}
