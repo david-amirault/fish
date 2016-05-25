@@ -37,23 +37,24 @@ public class Game
                 d.setWork(false);
 
         }
+
+        // remove cards
+        for (int i = 0; i < 6; i++)
+        {
+            Question q = d.getQuestion(i);
+            for (Controller c : controllers)
+            {
+                if (c.player().gotdem(q.card()))
+                {
+                    d.getQuestion(i).setHold(c.player().id());
+                    c.player().lose(q.card());
+                    break;
+                }
+            }
+        }
         int id = d.getQuestion(0).asker();
         if (d.worked())
         {
-            // remove cards
-            for (int i = 0; i < 6; i++)
-            {
-                Question q = d.getQuestion(i);
-                for (Controller c : controllers)
-                {
-                    if (c.player().gotdem(q.card()))
-                    {
-                        d.getQuestion(i).setHold(c.player().id());
-                        c.player().lose(q.card());
-                        break;
-                    }
-                }
-            }
             for (Controller c : controllers)
                 c.player().point(id);
         }

@@ -21,7 +21,7 @@ public class SinglePlayerGame
         }
 
         List<Controller> c = new ArrayList<Controller>();
-        c.add(new HumanTextController(p.get(0)));
+        c.add(new HumanGUIController(p.get(0)));
         for (int i = 1; i < 6; i++)
             c.add(new AIDummyController(p.get(i)));
 

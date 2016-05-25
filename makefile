@@ -1,7 +1,10 @@
 # standalone programs
 
-SinglePlayerGame.class: SinglePlayerGame.java Game.class HumanTextController.class AIDummyController.class Deck.class
+SinglePlayerGame.class: SinglePlayerGame.java Game.class HumanGUIController.class AIDummyController.class Deck.class
 	javac SinglePlayerGame.java
+
+SinglePlayerTextGame.class: SinglePlayerTextGame.java Game.class HumanTextController.class AIDummyController.class Deck.class
+	javac SinglePlayerTextGame.java
 
 AIDummyGame.class: AIDummyGame.java Game.class AIDummyController.class Deck.class
 	javac AIDummyGame.java
@@ -16,6 +19,12 @@ DeckTester.class: DeckTester.java Deck.class
 
 Game.class: Game.java Controller.class
 	javac Game.java
+
+HumanGUIController.class: HumanGUIController.java Controller.class FishGUI.class
+	javac HumanGUIController.java
+
+FishGUI.class: FishGUI.java
+	javac FishGUI.java
 
 HumanTextController.class: HumanTextController.java Controller.class
 	javac HumanTextController.java

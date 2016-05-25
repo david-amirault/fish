@@ -46,7 +46,7 @@ public class Card {
         suit = cardSuit;
         highHalf = true;
         try {
-            if (Integer.parseInt(cardRank)<8) {
+            if (Integer.parseInt(cardRank) < 8) {
                 highHalf = false;
             }
             else {
