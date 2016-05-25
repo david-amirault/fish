@@ -39,4 +39,25 @@ public class Declaration
     {
         return guess.get(i);
     }
+
+    @Override
+    public String toString()
+    {
+        String msg = "Player " + guess.get(0).asker() + " declares!\n";
+
+        msg += "Guess:\n";
+        for (int i = 0; i < 6; i++)
+            msg += "Player " + guess.get(i).target() + " has the " + guess.get(i).card() + ".\n";
+
+        msg += "Truth:\n";
+        for (int i = 0; i < 6; i++)
+            msg += "Player " + guess.get(i).holder() + " has the " + guess.get(i).card() + ".\n";
+
+        if (worked)
+            msg += "Correct!\n";
+        else
+            msg += "Incorrect!\n";
+
+        return msg;
+    }
 }

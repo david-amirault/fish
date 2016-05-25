@@ -35,4 +35,16 @@ public class Question
     {
         worked = w;
     }
+
+    @Override
+    public String toString()
+    {
+        String msg = "Player " + asker + " asks Player " + target + " for the " + card + ".\n";
+        if (worked)
+            msg += "Correct!\n";
+        else
+            msg += "Go fish!\n";
+
+        return msg;
+    }
 }

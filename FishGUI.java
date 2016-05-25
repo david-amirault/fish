@@ -21,7 +21,7 @@ import java.lang.Boolean;
 /**
  * This class provides a GUI for solitaire games related to Elevens.
  */
-public class CardGameGUI extends JFrame implements ActionListener {
+public class FishGUI extends JFrame implements ActionListener {
 
 	/** Height of the game frame. */
 	private static final int DEFAULT_HEIGHT = 302;
@@ -79,28 +79,25 @@ public class CardGameGUI extends JFrame implements ActionListener {
 
 	/** kth element is true iff the user has selected card #k. */
 	private List<Boolean> selections;
-	/** A two-element array to track the number of half-suits won. */
-	private int[] score;
 
 
 	/**
 	 * Initialize the GUI.
 	 * @param p is a <code>Player</code> subclass.
 	 */
-	public CardGameGUI(Player p) {
+	public FishGUI(Player p) {
         player = p;
-        score = new int[2];
 
-		// Initialize cardCoords using 8 cards
 		cardCoords = new ArrayList<Point>();
 		int x = LAYOUT_LEFT;
 		int y = LAYOUT_TOP;
-		for (int i = 0; i < 8; i++) {
+        selections = new ArrayList<Boolean>();
+		for (int i = 0; i < player.size(); i++) {
 			cardCoords.add(new Point(x, y));
             x += LAYOUT_WIDTH_INC;
+            selections.add(new Boolean(false));
 		}
 
-		selections = new ArrayList<Boolean>(8, new Boolean(false));
 		initDisplay();
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		repaint();
@@ -117,27 +114,40 @@ public class CardGameGUI extends JFrame implements ActionListener {
 		});
 	}
 
+    /**
+     * Update the statusMsg JLabel with the most recent game event.
+     */
+    public void status(String msg) {
+        statusMsg.setText(msg);
+    }
+
 	/**
 	 * Draw the display (cards and messages).
 	 */
 	public void repaint() {
+		displayCards = new ArrayList<JLabel>();
+		for (int k = player.size() - 1; k > 0; k--) {
+			displayCards.add(new JLabel());
+			panel.add(displayCards.get(k));
+			displayCards.get(k).setBounds(cardCoords.get(k).x, cardCoords.get(k).y, CARD_WIDTH, CARD_HEIGHT);
+			displayCards.get(k).addMouseListener(new MyMouseListener());
+			selections.set(k, new Boolean(false));
+		}
+
 		for (int k = player.size() - 1; k > 0; k--) {
 			String cardImageFileName = imageFileName(player.hand().get(k), selections.get(k).booleanValue());
 			URL imageURL = getClass().getResource(cardImageFileName);
 			if (imageURL != null) {
 				ImageIcon icon = new ImageIcon(imageURL);
-				displayCards[k].setIcon(icon);
-				displayCards[k].setVisible(true);
+				displayCards.get(k).setIcon(icon);
+				displayCards.get(k).setVisible(true);
 			} else {
 				throw new RuntimeException(
 					"Card image not found: \"" + cardImageFileName + "\"");
 			}
 		}
-		statusMsg.setText(board.deckSize()
-			+ " undealt cards remain.");
 		statusMsg.setVisible(true);
-		totalsMsg.setText("You've won " + totalWins
-			 + " out of " + totalGames + " games.");
+		totalsMsg.setText("Score: " + player.score()[0] + " to " + player.score()[1] + ".");
 		totalsMsg.setVisible(true);
 		pack();
 		panel.repaint();
@@ -153,53 +163,25 @@ public class CardGameGUI extends JFrame implements ActionListener {
 			}
 		};
 
-		// If board object's class name follows the standard format
-		// of ...Board or ...board, use the prefix for the JFrame title
-		String className = board.getClass().getSimpleName();
-		int classNameLen = className.length();
-		int boardLen = "Board".length();
-		String boardStr = className.substring(classNameLen - boardLen);
-		if (boardStr.equals("Board") || boardStr.equals("board")) {
-			int titleLength = classNameLen - boardLen;
-			setTitle(className.substring(0, titleLength));
-		}
+        setTitle("Fish Player " + player.id());
 
-		// Calculate number of rows of cards (5 cards per row)
-		// and adjust JFrame height if necessary
-		int numCardRows = (board.size() + 4) / 5;
-		int height = DEFAULT_HEIGHT;
-		if (numCardRows > 2) {
-			height += (numCardRows - 2) * LAYOUT_HEIGHT_INC;
-		}
-
-		this.setSize(new Dimension(DEFAULT_WIDTH, height));
+		this.setSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
 		panel.setLayout(null);
-		panel.setPreferredSize(
-			new Dimension(DEFAULT_WIDTH - 20, height - 20));
-		displayCards = new JLabel[board.size()];
-		for (int k = board.size() - 1; k > 0; k--) {
-			displayCards[k] = new JLabel();
-			panel.add(displayCards[k]);
-			displayCards[k].setBounds(cardCoords[k].x, cardCoords[k].y,
-										CARD_WIDTH, CARD_HEIGHT);
-			displayCards[k].addMouseListener(new MyMouseListener());
-			selections[k] = false;
-		}
+		panel.setPreferredSize(new Dimension(DEFAULT_WIDTH - 20, DEFAULT_HEIGHT - 20));
+
 		replaceButton = new JButton();
-		replaceButton.setText("Replace");
+		replaceButton.setText("Declare");
 		panel.add(replaceButton);
 		replaceButton.setBounds(BUTTON_LEFT, BUTTON_TOP, 100, 30);
 		replaceButton.addActionListener(this);
 
 		restartButton = new JButton();
-		restartButton.setText("Restart");
+		restartButton.setText("Ask");
 		panel.add(restartButton);
-		restartButton.setBounds(BUTTON_LEFT, BUTTON_TOP + BUTTON_HEIGHT_INC,
-										100, 30);
+		restartButton.setBounds(BUTTON_LEFT, BUTTON_TOP + BUTTON_HEIGHT_INC, 100, 30);
 		restartButton.addActionListener(this);
 
-		statusMsg = new JLabel(
-			board.deckSize() + " undealt cards remain.");
+		statusMsg = new JLabel("Game started!");
 		panel.add(statusMsg);
 		statusMsg.setBounds(LABEL_LEFT, LABEL_TOP, 250, 30);
 
@@ -219,15 +201,9 @@ public class CardGameGUI extends JFrame implements ActionListener {
 		panel.add(lossMsg);
 		lossMsg.setVisible(false);
 
-		totalsMsg = new JLabel("You've won " + totalWins
-			+ " out of " + totalGames + " games.");
-		totalsMsg.setBounds(LABEL_LEFT, LABEL_TOP + 2 * LABEL_HEIGHT_INC,
-								  250, 30);
+		totalsMsg.setText("Score: " + player.score()[0] + " to " + player.score()[1] + ".");
+		totalsMsg.setBounds(LABEL_LEFT, LABEL_TOP + 2 * LABEL_HEIGHT_INC, 250, 30);
 		panel.add(totalsMsg);
-
-		if (!board.anotherPlayIsPossible()) {
-			signalLoss();
-		}
 
 		pack();
 		getContentPane().add(panel);
@@ -273,40 +249,21 @@ public class CardGameGUI extends JFrame implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource().equals(replaceButton)) {
-			// Gather all the selected cards.
+			// DO DECLARATION STUFF
 			List<Integer> selection = new ArrayList<Integer>();
-			for (int k = 0; k < board.size(); k++) {
-				if (selections[k]) {
+			for (int k = 0; k < player.size(); k++) {
+				if (selections.get(k).booleanValue()) {
 					selection.add(new Integer(k));
 				}
 			}
-			// Make sure that the selected cards represent a legal replacement.
-			if (!board.isLegal(selection)) {
-				signalError();
-				return;
-			}
-			for (int k = 0; k < board.size(); k++) {
-				selections[k] = false;
-			}
-			// Do the replace.
-			board.replaceSelectedCards(selection);
-			if (board.isEmpty()) {
-				signalWin();
-			} else if (!board.anotherPlayIsPossible()) {
-				signalLoss();
+			for (int k = 0; k < player.size(); k++) {
+				selections.set(k, new Boolean(false));
 			}
 			repaint();
 		} else if (e.getSource().equals(restartButton)) {
-			board.newGame();
-			getRootPane().setDefaultButton(replaceButton);
-			winMsg.setVisible(false);
-			lossMsg.setVisible(false);
-			if (!board.anotherPlayIsPossible()) {
-				signalLoss();
-				lossMsg.setVisible(true);
-			}
-			for (int i = 0; i < selections.length; i++) {
-				selections[i] = false;
+            // DO QUESTION STUFF
+			for (int i = 0; i < selections.size(); i++) {
+				selections.set(i, new Boolean(false));
 			}
 			repaint();
 		} else {
@@ -321,8 +278,6 @@ public class CardGameGUI extends JFrame implements ActionListener {
 	private void signalWin() {
 		getRootPane().setDefaultButton(restartButton);
 		winMsg.setVisible(true);
-		totalWins++;
-		totalGames++;
 	}
 
 	/**
@@ -331,7 +286,6 @@ public class CardGameGUI extends JFrame implements ActionListener {
 	private void signalLoss() {
 		getRootPane().setDefaultButton(restartButton);
 		lossMsg.setVisible(true);
-		totalGames++;
 	}
 
 	/**
@@ -345,10 +299,9 @@ public class CardGameGUI extends JFrame implements ActionListener {
 		 * @param e the mouse event.
 		 */
 		public void mouseClicked(MouseEvent e) {
-			for (int k = 0; k < board.size(); k++) {
-				if (e.getSource().equals(displayCards[k])
-						&& board.cardAt(k) != null) {
-					selections[k] = !selections[k];
+			for (int k = 0; k < player.size(); k++) {
+				if (e.getSource().equals(displayCards.get(k))) {
+					selections.set(k, new Boolean(!selections.get(k).booleanValue()));
 					repaint();
 					return;
 				}

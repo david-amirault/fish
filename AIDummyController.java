@@ -110,13 +110,11 @@ public class AIDummyController extends Controller
 
         int startRank = (loc % 2) * 6;
         String startSuit = "";
-        boolean startHighHalf = false;
         for (Card c : super.player().hand())
         {
             if (c.code() == loc)
             {
                 startSuit = c.suit();
-                startHighHalf = c.highHalf();
                 dec.addQuestion(new Question(super.player().id(), super.player().id(), c));
             }
         }
@@ -127,10 +125,10 @@ public class AIDummyController extends Controller
             if (!shifted && i == handSizes[teammate])
                 teammate = (teammate + 2) % 6;
 
-            while (super.player().gotdem(new Card(ranks[startRank], startSuit, startHighHalf)))
+            while (super.player().gotdem(new Card(ranks[startRank], startSuit)))
                 startRank++;
 
-            dec.addQuestion(new Question(super.player().id(), teammate, new Card(ranks[startRank], startSuit, startHighHalf)));
+            dec.addQuestion(new Question(super.player().id(), teammate, new Card(ranks[startRank], startSuit)));
             startRank++;
         }
         return dec;
