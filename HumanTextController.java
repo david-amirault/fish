@@ -2,7 +2,7 @@ import java.util.Scanner;
 
 public class HumanTextController extends Controller
 {
-    private final boolean debugging = true;
+    private static final boolean debugging = true;
     private Scanner keyboard;
 
     public HumanTextController(Player p)
@@ -17,12 +17,34 @@ public class HumanTextController extends Controller
         String msg = d.toString();
         msg += "Score: " + super.player().score()[0] + " to " + super.player().score()[1] + ".\n";
         System.out.println(msg);
+        if (!debugging)
+        {
+            try
+            {
+                Thread.sleep(3000);
+            }
+            catch (InterruptedException ex)
+            {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     @Override
     public void hearQuestion(Question q)
     {
         System.out.println(q.toString());
+        if (!debugging)
+        {
+            try
+            {
+                Thread.sleep(3000);
+            }
+            catch (InterruptedException ex)
+            {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     @Override

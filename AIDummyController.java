@@ -7,7 +7,6 @@ public class AIDummyController extends Controller
     private String[] ranks = {"2", "3", "4", "5", "6", "7", "9", "10", "Jack", "Queen", "King", "Ace"};
     private Random rng;
     private int declareCount;
-    private int[] handSizes;
     private NeuralNetwork net;
 
     public AIDummyController(Player p)
@@ -15,9 +14,6 @@ public class AIDummyController extends Controller
         super(p);
         rng = new Random();
         declareCount = 0;
-        handSizes = new int[6];
-        for (int i = 0; i < 6; i++)
-            handSizes[i] = 8;
     }
 
     public void saveNeuralNetwork(String filename) {
@@ -67,19 +63,12 @@ public class AIDummyController extends Controller
     public void hearQuestion(Question q)
     {
         declareCount++;
-        if (q.worked())
-        {
-            handSizes[q.asker()]++;
-            handSizes[q.target()]--;
-        }
     }
 
     @Override
     public void hearDeclaration(Declaration d)
     {
         declareCount = 0;
-        for (int i = 0; i < 6; i++)
-            handSizes[d.getQuestion(i).holder()]--;
     }
 
     @Override
@@ -122,7 +111,7 @@ public class AIDummyController extends Controller
         int teammate = (super.player().id() + 2) % 6;
         for (int i = 0; i < 6 - biggest; i++)
         {
-            if (!shifted && i == handSizes[teammate])
+            if (!shifted && i == super.player().handsizes()[teammate])
                 teammate = (teammate + 2) % 6;
 
             while (super.player().gotdem(new Card(ranks[startRank], startSuit)))
@@ -163,7 +152,7 @@ public class AIDummyController extends Controller
             startRank++;
 
         int enemy = (super.player().id() + 1 + 2 * rng.nextInt(3)) % 6;
-        while (handSizes[enemy] == 0)
+        while (super.player().handsizes()[enemy] == 0)
             enemy = (enemy + 2 * (1 + rng.nextInt(1))) % 6;
         return new Question(super.player().id(), enemy, new Card(ranks[startRank], startSuit, startHighHalf));
     }

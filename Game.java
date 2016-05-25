@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public class Game
 {
-    private final boolean debugging = true;
+    private static final boolean debugging = true;
     private List<Controller> controllers;
 
     private boolean teamOut(int i)
@@ -55,6 +55,13 @@ public class Game
                 }
             }
         }
+        int[] hands = new int[6];
+        for (int i = 0; i < 6; i++)
+            hands[i] = controllers.get(i).player().size();
+
+        for (Controller c : controllers)
+            c.player().sethands(hands);
+
         int id = d.getQuestion(0).asker();
         if (d.worked())
         {
@@ -104,6 +111,12 @@ public class Game
             id = q.asker();
             controllers.get(q.target()).player().lose(q.card());
             controllers.get(q.asker()).player().acquire(q.card());
+            int[] hands = new int[6];
+            for (int i = 0; i < 6; i++)
+                hands[i] = controllers.get(i).player().size();
+
+            for (Controller c : controllers)
+                c.player().sethands(hands);
         }
         for (Controller c : controllers)
             c.hearQuestion(q);
@@ -122,17 +135,6 @@ public class Game
                 System.out.println();
                 for (Controller con : controllers)
                     System.out.print(con.player().toString());
-            }
-            else
-            {
-                try
-                {
-                    Thread.sleep(3000);
-                }
-                catch (InterruptedException ex)
-                {
-                    Thread.currentThread().interrupt();
-                }
             }
             tmp = evaluateDeclaration(controllers.get(id).declare(teamOut(id + 1)));
             while (tmp == -1 || (tmp == 6 && teamOut(id + 1)))

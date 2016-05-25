@@ -12,13 +12,15 @@ public class HumanGUIController extends Controller
     @Override
     public void hearDeclaration(Declaration d)
     {
-        gui.status(d.toString());
+        gui.status(d.toString(), "Declaration");
+        gui.repaint();
     }
 
     @Override
     public void hearQuestion(Question q)
     {
-        gui.status(q.toString());
+        gui.status(q.toString(), "Question");
+        gui.repaint();
     }
 
     @Override

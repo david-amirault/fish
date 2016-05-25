@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class FishGUI extends JFrame {
 
 	/** Height of the game frame. */
-	private static final int DEFAULT_HEIGHT = 302;
+	private static final int DEFAULT_HEIGHT = 332;
 	/** Width of the game frame. */
 	private static final int DEFAULT_WIDTH = 800;
 	/** Width of a card. */
@@ -29,7 +29,9 @@ public class FishGUI extends JFrame {
 	 *  two vertically adjacent cards. */
 	private static final int LAYOUT_HEIGHT_INC = 125;
     /** Height of the text box. */
-    private static final int TEXT_HEIGHT = 50;
+    private static final int TEXTBOX_HEIGHT = 30;
+    /** Height of one line of hand size messages. */
+    private static final int TEXT_HEIGHT = 20;
 	/** y coord of the "Replace" button. */
 	private static final int BUTTON_TOP = 30;
 	/** x coord of the "Replace" button. */
@@ -56,22 +58,25 @@ public class FishGUI extends JFrame {
 	/** The Restart button. */
 	private JButton restartButton;
 	/** The "number of undealt cards remain" message. */
-	private JLabel statusMsg;
+	private JLabel promptMsg;
 	/** The "you've won n out of m games" message. */
 	private JLabel totalsMsg;
 	/** The win message. */
 	private JLabel winMsg;
 	/** The loss message. */
 	private JLabel lossMsg;
+    /** Hand sizes. */
+    private JLabel[] handMsg;
 
 	/** The card displays. */
 	private List<JLabel> displayCards;
 	/** The coordinates of the card displays. */
 	private List<Point> cardCoords;
-	/** contains k iff the user has selected card #k. */
+	/** Contains k iff the user has selected card #k. */
 	private List<Integer> selections;
-    /** to wait for a keypress. */
+    /** Ghetto synchronization. */
     private boolean entered;
+    private boolean clicked;
 
 
 	/**
@@ -101,17 +106,29 @@ public class FishGUI extends JFrame {
 	}
 
     /**
-     * Update the statusMsg JLabel with the most recent game event.
+     * Inform the user of the most recent game event.
      */
-    public void status(String msg) {
-        statusMsg.setText(msg);
-        repaint();
+    public void status(String msg, String title) {
+        Popup.infoBox(msg, title);
+    }
+
+    /**
+     * Update the promptMsg JLabel.
+     */
+    private void prompt(String msg) {
+        promptMsg.setText(msg);
+		promptMsg.setVisible(true);
+        pack();
+        panel.repaint();
     }
 
 	/**
 	 * Draw the display (cards and messages).
 	 */
 	public void repaint() {
+        for (int i = 0; i < 6; i++)
+            handMsg[i].setText("Player " + i + ":    " + player.handsizes()[i] + " cards");
+
 		cardCoords.clear();
 		int x = LAYOUT_LEFT;
 		int y = LAYOUT_TOP;
@@ -144,8 +161,7 @@ public class FishGUI extends JFrame {
 			}
 		}
 
-		statusMsg.setVisible(true);
-		totalsMsg.setText("Score: " + player.score()[0] + " to " + player.score()[1] + ".");
+		totalsMsg.setText("Score:    " + player.score()[0] + " to " + player.score()[1]);
 		totalsMsg.setVisible(true);
 		pack();
 		panel.repaint();
@@ -169,24 +185,34 @@ public class FishGUI extends JFrame {
 
 		replaceButton = new JButton();
 		replaceButton.setText("Ask");
+        replaceButton.setEnabled(false);
 		panel.add(replaceButton);
 		replaceButton.setBounds(BUTTON_LEFT, BUTTON_TOP, 100, 30);
 
 		restartButton = new JButton();
 		restartButton.setText("Declare");
+        restartButton.setEnabled(false);
 		panel.add(restartButton);
 		restartButton.setBounds(BUTTON_LEFT, BUTTON_TOP + BUTTON_HEIGHT_INC, 100, 30);
 
-        textField = new JTextField(20);
-        panel.add(textField);
-        textField.setBounds(LABEL_LEFT, LABEL_TOP, 160, 20);
+        handMsg = new JLabel[6];
+        for (int k = 0; k < 6; k++) {
+            handMsg[k] = new JLabel();
+            panel.add(handMsg[k]);
+            handMsg[k].setBounds(LAYOUT_LEFT, LABEL_TOP + k * TEXT_HEIGHT, 250, 30);
+        }
 
-		statusMsg = new JLabel("Game started!");
-		panel.add(statusMsg);
-		statusMsg.setBounds(LABEL_LEFT, LABEL_TOP + TEXT_HEIGHT, 250, 30);
+		promptMsg = new JLabel("Game started.");
+		panel.add(promptMsg);
+		promptMsg.setBounds(LABEL_LEFT, LABEL_TOP, 250, 30);
+
+        textField = new JTextField(20);
+        textField.setEnabled(false);
+        panel.add(textField);
+        textField.setBounds(LABEL_LEFT, LABEL_TOP + TEXTBOX_HEIGHT, 160, 20);
 
 		winMsg = new JLabel();
-		winMsg.setBounds(LABEL_LEFT, LABEL_TOP + TEXT_HEIGHT + LABEL_HEIGHT_INC, 200, 30);
+		winMsg.setBounds(LABEL_LEFT, LABEL_TOP + TEXTBOX_HEIGHT + LABEL_HEIGHT_INC, 200, 30);
 		winMsg.setFont(new Font("SansSerif", Font.BOLD, 25));
 		winMsg.setForeground(Color.GREEN);
 		winMsg.setText("You win!");
@@ -194,7 +220,7 @@ public class FishGUI extends JFrame {
 		winMsg.setVisible(false);
 
 		lossMsg = new JLabel();
-		lossMsg.setBounds(LABEL_LEFT, LABEL_TOP + LABEL_HEIGHT_INC, 200, 30);
+		lossMsg.setBounds(LABEL_LEFT, LABEL_TOP + TEXTBOX_HEIGHT + LABEL_HEIGHT_INC, 200, 30);
 		lossMsg.setFont(new Font("SanSerif", Font.BOLD, 25));
 		lossMsg.setForeground(Color.RED);
 		lossMsg.setText("Sorry, you lose.");
@@ -202,8 +228,7 @@ public class FishGUI extends JFrame {
 		lossMsg.setVisible(false);
 
         totalsMsg = new JLabel();
-		totalsMsg.setText("Score: " + player.score()[0] + " to " + player.score()[1] + ".");
-		totalsMsg.setBounds(LABEL_LEFT, LABEL_TOP + 2 * LABEL_HEIGHT_INC, 250, 30);
+		totalsMsg.setBounds(LABEL_LEFT, LABEL_TOP + TEXTBOX_HEIGHT + 2 * LABEL_HEIGHT_INC, 250, 30);
 		panel.add(totalsMsg);
 
 		pack();
@@ -248,9 +273,13 @@ public class FishGUI extends JFrame {
 	 * or the "Restart" button).
 	 * @param e the button click action event
 	 */
-    private String getText(String statusMsg) {
-        status(statusMsg);
+    private String getText(String promptMsg) {
+        prompt(promptMsg);
         entered = false;
+        textField.setEnabled(true);
+        for (ActionListener al : textField.getActionListeners())
+            textField.removeActionListener(al);
+
         textField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textField.selectAll();
@@ -258,82 +287,117 @@ public class FishGUI extends JFrame {
             }
         });
         while (!entered) {
-            // chillax
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
         }
-        return textField.getText();
+        String txtMsg = textField.getText();
+        textField.setEnabled(false);
+        return txtMsg;
     }
 
     private Question inputQuestion(String targetMsg, String suit) {
         int t = Integer.parseInt(getText(targetMsg));
-        String r = getText("Enter card rank");
+        String r = getText("Enter card rank:");
         return new Question(player.id(), t, new Card(r, suit));
     }
 
     public Declaration declare(boolean must) {
         Declaration dec = new Declaration();
-        entered = false;
-        replaceButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                selections.clear();
-                if (!must) {
-                    repaint();
-                    entered = true;
-                } else {
-                    status("You must declare!");
-                }
+        clicked = false;
+        if (!must)
+        {
+            replaceButton.setEnabled(true);
+            for (ActionListener al : replaceButton.getActionListeners())
+                replaceButton.removeActionListener(al);
 
-            }
-        });
+            replaceButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    clicked = true;
+                }
+            });
+        }
+
+        restartButton.setEnabled(true);
+        for (ActionListener al : restartButton.getActionListeners())
+            restartButton.removeActionListener(al);
+
         restartButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 for (int i = 0; i < selections.size(); i++)
                 {
                     dec.addQuestion(new Question(player.id(), player.id(), player.hand().get(selections.get(i).intValue())));
                     if (i > 0 && dec.getQuestion(i).card().code() != dec.getQuestion(i - 1).card().code()) {
-                        entered = true;
+                        clicked = true;
                         break;
                     }
                 }
 
                 if (dec.size() >= 6)
-                    entered = true;
+                    clicked = true;
 
-                if (!entered) {
-                    entered = true;
+                if (!clicked) {
+                    clicked = true;
                     String s;
                     if (dec.size() == 0)
-                        s = getText("Enter declared suit");
+                        s = getText("Enter declared suit:");
                     else
                         s = dec.getQuestion(0).card().suit();
 
                     while (dec.size() < 6)
-                        dec.addQuestion(inputQuestion("Enter teammate id", s));
+                        dec.addQuestion(inputQuestion("Enter teammate id:", s));
                 }
 
                 selections.clear();
                 repaint();
             }
         });
-        while (!entered) {
+        while (!clicked) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
         }
+        replaceButton.setEnabled(false);
+        restartButton.setEnabled(false);
         return dec;
     }
 
     public Question ask() {
-        entered = false;
+        clicked = true;
+        if (selections.size() != 1) {
+            clicked = false;
+            selections.clear();
+            repaint();
+        }
+        replaceButton.setEnabled(true);
+        for (ActionListener al : replaceButton.getActionListeners())
+            replaceButton.removeActionListener(al);
+
         replaceButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (selections.size() != 1) {
                     selections.clear();
                     repaint();
                 } else {
-                    entered = true;
+                    clicked = true;
                 }
             }
         });
-        while (!entered) {
+        while (!clicked) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
         }
-        return inputQuestion("Enter enemy id", player.hand().get(selections.get(0).intValue()).suit());
+        replaceButton.setEnabled(false);
+        Question q = inputQuestion("Enter enemy id:", player.hand().get(selections.get(0).intValue()).suit());
+        selections.clear();
+        return q;
     }
 
 	/**
@@ -405,4 +469,10 @@ public class FishGUI extends JFrame {
 		public void mousePressed(MouseEvent e) {
 		}
 	}
+
+    private static class Popup {
+        public static void infoBox(String infoMessage, String titleBar) {
+            JOptionPane.showMessageDialog(null, infoMessage, "InfoBox: " + titleBar, JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
 }

@@ -15,6 +15,8 @@ public class Player
     // low spades       = 6
     // high spades      = 7
     private int[] halfsuits;
+    // hand size for each of the six players
+    private int[] handsizes;
     private int[] score;
 
     // id's range from 0 to 5
@@ -25,6 +27,10 @@ public class Player
     {
         hand = new ArrayList<Card>();
         halfsuits = new int[8];
+        handsizes = new int[6];
+        for (int h = 0; h < 6; h++)
+            handsizes[h] = 8;
+
         score = new int[2];
         id = i;
     }
@@ -32,6 +38,7 @@ public class Player
     public List<Card> hand() { return hand; }
     public int size() { return hand.size(); }
     public int[] halfsuits() { return halfsuits; }
+    public int[] handsizes() { return handsizes; }
     public int[] score() { return score; }
     public int id() { return id; }
 
@@ -50,6 +57,11 @@ public class Player
     {
         hand.remove(other);
         halfsuits[other.code()]--;
+    }
+
+    public void sethands(int[] h)
+    {
+        handsizes = h;
     }
 
     public void point(int i)
