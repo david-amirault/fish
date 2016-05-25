@@ -1,6 +1,7 @@
 import java.util.*;
+import java.io.*;
 
-public class NeuralNetwork {
+public class NeuralNetwork implements Serializable {
 	private List<List<Perceptron>> network;
 	private double learningRate;
 
@@ -45,7 +46,7 @@ public class NeuralNetwork {
 		return outArray;
 	}
 
-	public void out(List<Double> init) {
+	public List<Double> out(List<Double> init) {
 		List<Double> outArray = init;
 		List<Double> dummyArray;
 		double pass = 0;
@@ -58,6 +59,7 @@ public class NeuralNetwork {
 			}
 			outArray = dummyArray;
 		}
+		return outArray;
 	}
 
 	private double error(int nodeId, List<Double> init, List<Double> expected) {
@@ -110,7 +112,7 @@ public class NeuralNetwork {
 			pass = network.get(col).get(i).getOutput();
 			totalPass = 0;
 			for (j=0; j < network.get(1).size(); j++) {
-				totalPass += network.get(1).get(j).getErrorSignal()*network.get(1).getWeight(i);
+				totalPass += network.get(1).get(j).getErrorSignal()*network.get(1).get(j).getWeight(i);
 			}
 			network.get(0).get(i).setErrorSignal(totalPass*pass*(1-pass));
 			for (j=0; j<input; j++) {
@@ -128,5 +130,10 @@ public class NeuralNetwork {
 
 	private double phiprime(double x) {
 		return -Math.exp(-x)/Math.pow(1+Math.exp(-x),2);
+	}
+
+	public void printTest() {
+		System.out.println(learningRate);
+		for (int i = 0; i < network.size(); i++) System.out.println(network.get(i).size());
 	}
 }

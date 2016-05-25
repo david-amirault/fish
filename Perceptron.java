@@ -1,6 +1,7 @@
 import java.util.*;
+import java.io.*;
 
-public class Perceptron {
+public class Perceptron implements Serializable {
 	private List<Double> weights;
 	private double output;
 	private double errorSignal;
