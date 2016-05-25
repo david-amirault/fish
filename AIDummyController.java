@@ -8,6 +8,7 @@ public class AIDummyController extends Controller
     private Random rng;
     private int declareCount;
     private NeuralNetwork net;
+    private List<Double> visualization;
 
     public AIDummyController(Player p)
     {
@@ -57,6 +58,37 @@ public class AIDummyController extends Controller
         // The AI looks at the visualization, picks the last half suit that was asked
         // (or the one it has the most of) and asks for the highest probability card in the
         // half suit.
+        List<Integer> sizes = new ArrayList<Integer>(2);
+        sizes.add(52*6);
+        sizes.add(52*6);
+        int inputs = 52*6+12+52;
+        net = new NeuralNetwork(inputs, sizes, 0.1);
+        visualization = new ArrayList<Double>(52*6);
+        whaddayaKnow();
+    }
+
+    public void runNetwork(Question q) {
+        List<Double> input = new ArrayList<Double>(52*6+12+52);
+        for (Double d : visualization) input.add(d);
+        for (int i = 0; i < 64; i++) {
+            input.set(i,0);
+        }
+        //NEED TO IMPLEMENT QUESTION LISTENING AND TRAINING.
+    }
+
+    public void whaddayaKnow() {
+        // Clean up the board visualization by comfirming what is trivially known.
+        for (int i = 0; i < 52; i++) {
+            if (super.player().gotdem(new Card(id))) {
+                for (int j = 0; j < 6; j++) {
+                    visualization.set(6*i+j, 0)
+                }
+                visualization.set(6*i+super.player().id(), 1);
+            }
+            else {
+                visualization.set(6*i+super.player().id(), 0);
+            }
+        }
     }
 
     @Override

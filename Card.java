@@ -58,6 +58,96 @@ public class Card {
         }
     }
 
+    public Card(int id) {
+        //generate card based on ID (0-51)
+        switch (id%4) {
+            case 0:
+                suit = "Clubs";
+                break;
+            case 1:
+                suit = "Diamonds";
+                break;
+            case 2:
+                suit = "Hearts";
+                break;
+            case 3:
+                suit = "Spades";
+                break;
+            default:
+                suit = "";
+                break;
+        }
+        if (id%13 < 6) {
+            highHalf = false;
+            rank = ""+(id+2);
+        }
+        else if (id%13 < 9) {
+            highHalf = true;
+            rank = ""+(id+2);
+        }
+        else if (id == 9) {
+            highHalf = true;
+            rank = "Jack";
+        }
+        else if (id == 10) {
+            highHalf = true;
+            rank = "Queen";
+        }
+        else if (id == 11) {
+            highHalf = true;
+            rank = "King";
+        }
+        else if (id == 12) {
+            highHalf = true;
+            rank = "Ace";
+        }
+    }
+
+    public int id() {
+        int mod4 = 0;
+        int mod13 = 0;
+        switch (suit) {
+            case "Clubs":
+                mod4 = 0;
+                break;
+            case "Diamonds":
+                mod4 = 1;
+                break;
+            case "Hearts":
+                mod4 = 2;
+                break;
+            case "Spades":
+                mod4 = 3;
+                break;
+            default:
+                mod4 = 0;
+                break;
+        }
+        try {
+            mod13 = Integer.parseInt(rank)-2;
+        }
+        catch (NumberFormatException nfe) {
+            switch (rank) {
+                case "Jack":
+                    mod13 = 9;
+                    break;
+                case "Queen":
+                    mod13 = 10;
+                    break;
+                case "King":
+                    mod13 = 11;
+                    break;
+                case "Ace":
+                    mod13 = 12;
+                    break;
+                default:
+                    mod13 = 0;
+                    break;
+            }
+        }
+        return (13*mod4 + 40*mod13)%52;
+    }
+
     /**
      * Accesses this <code>Card's</code> rank.
      * @return this <code>Card's</code> rank.
