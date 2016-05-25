@@ -1,5 +1,6 @@
 import java.lang.String;
-import java.util.Random;
+import java.util.*;
+import java.io.*;
 
 public class AIDummyController extends Controller
 {
@@ -7,6 +8,7 @@ public class AIDummyController extends Controller
     private Random rng;
     private int declareCount;
     private int[] handSizes;
+    private NeuralNetwork net;
 
     public AIDummyController(Player p)
     {
@@ -16,6 +18,49 @@ public class AIDummyController extends Controller
         handSizes = new int[6];
         for (int i = 0; i < 6; i++)
             handSizes[i] = 8;
+    }
+
+    public void saveNeuralNetwork(String filename) {
+        try {
+            FileOutputStream f_out = new FileOutputStream(filename);
+            try {
+                ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
+                obj_out.writeObject(net);
+            }
+            catch (IOException io) {}
+        }
+        catch (FileNotFoundException fnf) {}
+    }
+
+    public void loadNeuralNetwork(String filename) {
+        try {
+            FileInputStream f_in = new FileInputStream(filename);
+            try {
+                ObjectInputStream obj_in = new ObjectInputStream(f_in);
+                try {
+                    Object obj = obj_in.readObject();
+                    if (obj instanceof NeuralNetwork) {
+                        net = (NeuralNetwork) obj;
+                    }
+                }
+                catch (ClassNotFoundException cnf) {}
+            }
+            catch (IOException io) {}
+        }
+        catch (FileNotFoundException fnf) {}
+    }
+
+    public void setUpNetwork() {
+        // 52 x 6 grid --> vector
+        // Which player owns each card?
+        // Input vector additionally stores a card id, an old player id, and a new player id
+        // Neural network can have columns of size 3+52x6 52 52x6
+        // Read the output as the prediction for the new board. Probabilities!!!
+        // We apply the neural network to our visualization after every move.
+        // At the same time we "cheat" by training the network against real data.
+        // The AI looks at the visualization, picks the last half suit that was asked
+        // (or the one it has the most of) and asks for the highest probability card in the
+        // half suit.
     }
 
     @Override
