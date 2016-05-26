@@ -16,7 +16,8 @@ public class AIDummyController extends Controller
         super(p);
         rng = new Random();
         declareCount = 0;
-        setUpNetwork();
+        //setUpNetwork();
+        quickSetup();
     }
 
     public void saveNeuralNetwork(String filename) {
@@ -47,6 +48,69 @@ public class AIDummyController extends Controller
             catch (IOException io) {}
         }
         catch (FileNotFoundException fnf) {}
+    }
+
+    // a simple algorithm not using the neural network
+    public void quickSetup() {
+        visualization = new ArrayList<Double>(52*6);
+        for (int i = 0; i < 52*6; i++)
+            visualization.add(new Double(0.2));
+
+        whaddayaKnow(); // this will fix the extra 0.2
+    }
+
+    public void quickQuestion(Question q) {
+        if (q.worked()) {
+            for (int i = 0; i < 6; i++)
+                visualization.set(6 * q.card().id() + i, new Double(0.0));
+
+            visualization.set(6 * q.card().id() + q.asker(), new Double(1.0));
+        } else {
+            // split up the target's chance of having the card proportionally among the remaining players
+            double split = visualization.get(6 * q.card().id() + q.target()).doubleValue();
+            visualization.set(6 * q.card().id() + q.target(), new Double(0.0));
+            for (int i = 0; i < 6; i++) {
+                double thisAmount = visualization.get(6 * q.card().id() + i).doubleValue();
+                visualization.set(6 * q.card().id() + i, new Double(thisAmount + thisAmount * split / (1.0 - split)));
+            }
+        }
+
+        // accounting for the fact that the asker is in the half-suit
+        double notInHalfsuit = 1.0;
+        int halfCode = q.card().code();
+        int mod4 = halfCode / 2;
+        int mod13 = (halfCode % 2) * 7;
+        int cardid = (13 * mod4 + 40 * mod13) % 52;
+        for (int i = 0; i < 6; i++)
+        {
+            notInHalfsuit *= 1.0 - visualization.get(6 * cardid + q.asker()).doubleValue();
+            cardid = (cardid + 40) % 52;
+        }
+        double inHalfsuit = 1.0 - notInHalfsuit;
+        if (inHalfsuit < 0.999)
+        {
+            cardid = (13 * mod4 + 40 * mod13) % 52;
+            for (int i = 0; i < 6; i++)
+            {
+                double startAmount = visualization.get(6 * cardid + q.asker()).doubleValue();
+                double gainedAmount = startAmount / inHalfsuit - startAmount;
+                for (int j = 0; j < 6; j++) {
+                    double thisAmount = visualization.get(6 * cardid + j).doubleValue();
+                    visualization.set(6 * cardid + j, new Double(thisAmount - thisAmount * gainedAmount / (1.0 - startAmount)));
+                }
+                visualization.set(6 * cardid + q.asker(), new Double(startAmount / inHalfsuit));
+                cardid = (cardid + 40) % 52;
+            }
+        }
+    }
+
+    public void quickDeclaration(Declaration d) {
+        for (int i = 0; i < 6; i++) {
+            int id = d.getQuestion(i).card().id();
+            // nobody has it anymore
+            for (int j = 0; j < 6; j++)
+                visualization.set(6 * id + j, new Double(0.0));
+        }
     }
 
     public void setUpNetwork() {
@@ -94,29 +158,41 @@ public class AIDummyController extends Controller
         for (int i = 0; i < 52; i++) {
             if (super.player().gotdem(new Card(i))) {
                 for (int j = 0; j < 6; j++) {
-                    visualization.set(6*i+j, 0.0);
+                    visualization.set(6*i+j, new Double(0.0));
                 }
-                visualization.set(6*i+super.player().id(), 1.0);
+                visualization.set(6*i+super.player().id(), new Double(1.0));
             }
             else {
-                visualization.set(6*i+super.player().id(), 0.0);
+                visualization.set(6*i+super.player().id(), new Double(0.0));
             }
+        }
+        // fix the eights
+        int eight = 6; // it's a card id ok?
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 6; j++)
+                visualization.set(6 * eight + j, new Double(0.0));
+
+            eight += 13;
         }
     }
 
     @Override
     public void hearQuestion(Question q, List<Double> board)
     {
-        loadNeuralNetwork("latest.nnt");
-        runNetwork(q, board, true);
-        saveNeuralNetwork("latest.nnt");
+        //loadNeuralNetwork("latest.nnt");
+        //runNetwork(q, board, true);
+        //saveNeuralNetwork("latest.nnt");
+        quickQuestion(q);
         if (!q.worked())
             declareCount++;
+        else
+            declareCount = 0;
     }
 
     @Override
     public void hearDeclaration(Declaration d)
     {
+        quickDeclaration(d);
         declareCount = 0;
     }
 
@@ -130,6 +206,7 @@ public class AIDummyController extends Controller
         {
             Declaration dec = new Declaration();
             double prob = 1.0;
+            int[] handsizes = new int[6];
             int mod4 = i / 2;
             int mod13 = (i % 2) * 7;
             int cardid = (13 * mod4 + 40 * mod13) % 52;
@@ -141,7 +218,7 @@ public class AIDummyController extends Controller
                 int likelyHolder = teammate;
                 for (int k = 0; k < 3; k++) // teammate
                 {
-                    if (visualization.get(6 * cardid + teammate).doubleValue() > chance)
+                    if (visualization.get(6 * cardid + teammate).doubleValue() > chance && handsizes[teammate] < super.player().handsizes()[teammate])
                     {
                         chance = visualization.get(6 * cardid + teammate).doubleValue();
                         likelyHolder = teammate;
@@ -149,6 +226,7 @@ public class AIDummyController extends Controller
                     teammate = (teammate + 2) % 6;
                 }
                 dec.addQuestion(new Question(super.player().id(), likelyHolder, c));
+                handsizes[likelyHolder]++;
                 prob *= chance;
                 cardid = (cardid + 40) % 52;
             }
@@ -157,9 +235,18 @@ public class AIDummyController extends Controller
                 biggest = prob;
                 halfsuit = i;
             }
+            decs.add(dec);
         }
-        if (biggest > certainty || must || declareCount + rng.nextInt(10) > 50)
+        if (biggest > certainty || must || declareCount + rng.nextInt(10) > 50) {
+            //for (int i = 0; i < 52; i++) {
+                //System.out.print(new Card(i) + ":");
+                //for (int j = 0; j < 6; j++)
+                    //System.out.print(" " + visualization.get(6 * i + j).doubleValue());
+
+                //System.out.println();
+            //}
             return decs.get(halfsuit);
+        }
 
         return new Declaration();
     }
@@ -176,8 +263,12 @@ public class AIDummyController extends Controller
         {
             for (int j = 0; j < 52; j++)
             {
+                // those pesky eights
+                if (j % 13 == 6)
+                    j++;
+
                 Card c = new Card(j);
-                if (halfsuits[c.code()] > 0 && visualization.get(6 * j + enemy).doubleValue() > biggest)
+                if (halfsuits[c.code()] > 0 && visualization.get(6 * j + enemy).doubleValue() > biggest && super.player().handsizes()[enemy] > 0)
                 {
                     biggest = visualization.get(6 * j + enemy).doubleValue();
                     playuh = enemy;
@@ -186,7 +277,6 @@ public class AIDummyController extends Controller
             }
             enemy = (enemy + 2) % 6;
         }
-        System.out.println(new Question(super.player().id(), playuh, winnuh));
         return new Question(super.player().id(), playuh, winnuh);
     }
 }

@@ -79,25 +79,25 @@ public class Card {
         }
         if (id%13 < 6) {
             highHalf = false;
-            rank = ""+(id+2);
+            rank = ""+(id%13+2);
         }
         else if (id%13 < 9) {
             highHalf = true;
-            rank = ""+(id+2);
+            rank = ""+(id%13+2);
         }
-        else if (id == 9) {
+        else if (id%13 == 9) {
             highHalf = true;
             rank = "Jack";
         }
-        else if (id == 10) {
+        else if (id%13 == 10) {
             highHalf = true;
             rank = "Queen";
         }
-        else if (id == 11) {
+        else if (id%13 == 11) {
             highHalf = true;
             rank = "King";
         }
-        else if (id == 12) {
+        else if (id%13 == 12) {
             highHalf = true;
             rank = "Ace";
         }
