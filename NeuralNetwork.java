@@ -13,12 +13,12 @@ public class NeuralNetwork implements Serializable {
 			if (i==0) {
 				for (int j = 0; j < sizes.get(i); j++) {
 					col.add(new Perceptron(inputs));
-				}			
+				}
 			}
 			else {
 				for (int j = 0; j < sizes.get(i); j++) {
 					col.add(new Perceptron(sizes.get(i-1)));
-				}				
+				}
 			}
 			network.add(col);
 		}

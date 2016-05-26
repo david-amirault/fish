@@ -34,7 +34,7 @@ public class Game
                 return -1;
             // not a half-suit
             if (i < 5 && q.card().code() != d.getQuestion(i + 1).card().code())
-                    return -1;
+                return -1;
 
             if (!controllers.get(q.target()).player().gotdem(q.card()))
                 d.setWork(false);

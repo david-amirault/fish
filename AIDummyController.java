@@ -24,7 +24,7 @@ public class AIDummyController extends Controller
                 ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
                 obj_out.writeObject(net);
             }
-            catch (IOException io) {}
+            catch (IOException io) {} // catching exceptions is for communists
         }
         catch (FileNotFoundException fnf) {}
     }
@@ -70,13 +70,13 @@ public class AIDummyController extends Controller
 
     public void runNetwork(Question q, List<Double> board, boolean training) {
         List<Double> input = new ArrayList<Double>(52*6+12+52);
-        for (Double d : visualization) input.add(d);
+        for (int i = 0; i < visualization.size(); i++) input.set(i, visualization.get(i));
         for (int i = 0; i < 64; i++) {
             input.set(52*6+i,0.0);
         }
-        input.set(52*6+52+q.asker(), 1.0);
-        input.set(52*6+52+6+q.target(), 1.0);
-        input.set(52*6+52+12+q.card().id(), 1.0);
+        input.set(52*6+q.asker(), 1.0);
+        input.set(52*6+6+q.target(), 1.0);
+        input.set(52*6+12+q.card().id(), 1.0);
         visualization = net.doOut(input);
         whaddayaKnow();
         if (training) {
