@@ -4,6 +4,7 @@ import java.io.*;
 
 public class AIDummyController extends Controller
 {
+    private static final double certainty = 0.8;
     private String[] ranks = {"2", "3", "4", "5", "6", "7", "9", "10", "Jack", "Queen", "King", "Ace"};
     private Random rng;
     private int declareCount;
@@ -105,7 +106,8 @@ public class AIDummyController extends Controller
         loadNeuralNetwork("latest.nnt");
         runNetwork(q, board, true);
         saveNeuralNetwork("latest.nnt");
-        declareCount++;
+        if (!q.worked())
+            declareCount++;
     }
 
     @Override
@@ -117,53 +119,45 @@ public class AIDummyController extends Controller
     @Override
     public Declaration declare(boolean must)
     {
-        Declaration dec = new Declaration();
-        int[] halfsuits = super.player().halfsuits();
-        int biggest = 0, loc = 0;
-        for (int i = 0; i < 8; i++)
+        List<Declaration> decs = new ArrayList<Declaration>();
+        double biggest = -1.0;
+        int halfsuit = 0;
+        for (int i = 0; i < 8; i++) // half-suit
         {
-            if (halfsuits[i] > biggest)
+            Declaration dec = new Declaration();
+            double prob = 1.0;
+            int mod4 = i / 2;
+            int mod13 = (i % 2) * 7;
+            int cardid = (13 * mod4 + 40 * mod13) % 52;
+            for (int j = 0; j < 6; j++) // card in half-suit
             {
-                biggest = halfsuits[i];
-                loc = i;
+                Card c = new Card(cardid);
+                double chance = -1.0;
+                int teammate = super.player().id();
+                int likelyHolder = teammate;
+                for (int k = 0; k < 3; k++) // teammate
+                {
+                    if (visualization.get(6 * cardid + teammate).doubleValue() > chance)
+                    {
+                        chance = visualization.get(6 * cardid + teammate).doubleValue();
+                        likelyHolder = teammate;
+                    }
+                    teammate = (teammate + 2) % 6;
+                }
+                dec.addQuestion(new Question(super.player().id(), likelyHolder, c));
+                prob *= chance;
+                cardid = (cardid + 40) % 52;
+            }
+            if (prob > biggest)
+            {
+                biggest = prob;
+                halfsuit = i;
             }
         }
-        if (biggest == 6)
-        {
-            for (Card c : super.player().hand())
-                if (c.code() == loc)
-                    dec.addQuestion(new Question(super.player().id(), super.player().id(), c));
+        if (biggest > certainty || must || declareCount + rng.nextInt(10) > 50)
+            return decs.get(halfsuit);
 
-            return dec;
-        }
-
-        if ((!must) && declareCount < 50 + rng.nextInt(10)) // to keep things interesting
-            return dec;
-
-        int startRank = (loc % 2) * 6;
-        String startSuit = "";
-        for (Card c : super.player().hand())
-        {
-            if (c.code() == loc)
-            {
-                startSuit = c.suit();
-                dec.addQuestion(new Question(super.player().id(), super.player().id(), c));
-            }
-        }
-        boolean shifted = false;
-        int teammate = (super.player().id() + 2) % 6;
-        for (int i = 0; i < 6 - biggest; i++)
-        {
-            if (!shifted && i == super.player().handsizes()[teammate])
-                teammate = (teammate + 2) % 6;
-
-            while (super.player().gotdem(new Card(ranks[startRank], startSuit)))
-                startRank++;
-
-            dec.addQuestion(new Question(super.player().id(), teammate, new Card(ranks[startRank], startSuit)));
-            startRank++;
-        }
-        return dec;
+        return new Declaration();
     }
 
     @Override
