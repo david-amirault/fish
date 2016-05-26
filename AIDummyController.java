@@ -16,6 +16,7 @@ public class AIDummyController extends Controller
         super(p);
         rng = new Random();
         declareCount = 0;
+        setUpNetwork();
     }
 
     public void saveNeuralNetwork(String filename) {
@@ -65,15 +66,18 @@ public class AIDummyController extends Controller
         int inputs = 52*6+12+52;
         net = new NeuralNetwork(inputs, sizes, 0.1);
         visualization = new ArrayList<Double>(52*6);
-        whaddayaKnow();
+        for (int i = 0; i < 52*6; i++)
+            visualization.add(new Double(0.2));
+
+        whaddayaKnow(); // this will fix the extra 0.2
         saveNeuralNetwork("latest.nnt");
     }
 
     public void runNetwork(Question q, List<Double> board, boolean training) {
         List<Double> input = new ArrayList<Double>(52*6+12+52);
-        for (int i = 0; i < visualization.size(); i++) input.set(i, visualization.get(i));
+        for (Double d : visualization) input.add(d);
         for (int i = 0; i < 64; i++) {
-            input.set(52*6+i,0.0);
+            input.add(new Double(0.0));
         }
         input.set(52*6+q.asker(), 1.0);
         input.set(52*6+6+q.target(), 1.0);
