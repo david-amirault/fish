@@ -23,7 +23,7 @@ Game.class: Game.java Controller.class
 HumanGUIController.class: HumanGUIController.java Controller.class FishGUI.class
 	javac HumanGUIController.java
 
-FishGUI.class: FishGUI.java
+FishGUI.class: FishGUI.java Declaration.class Player.class
 	javac FishGUI.java
 
 HumanTextController.class: HumanTextController.java Controller.class

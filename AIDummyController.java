@@ -71,7 +71,7 @@ public class AIDummyController extends Controller
         List<Double> input = new ArrayList<Double>(52*6+12+52);
         for (Double d : visualization) input.add(d);
         for (int i = 0; i < 64; i++) {
-            input.set(i,0);
+            input.set(i,new Double(0));
         }
         //NEED TO IMPLEMENT QUESTION LISTENING AND TRAINING.
     }
@@ -79,14 +79,14 @@ public class AIDummyController extends Controller
     public void whaddayaKnow() {
         // Clean up the board visualization by comfirming what is trivially known.
         for (int i = 0; i < 52; i++) {
-            if (super.player().gotdem(new Card(id))) {
+            if (super.player().gotdem(new Card(i))) {
                 for (int j = 0; j < 6; j++) {
-                    visualization.set(6*i+j, 0)
+                    visualization.set(6*i+j, new Double(0));
                 }
-                visualization.set(6*i+super.player().id(), 1);
+                visualization.set(6*i+super.player().id(), new Double(1));
             }
             else {
-                visualization.set(6*i+super.player().id(), 0);
+                visualization.set(6*i+super.player().id(), new Double(0));
             }
         }
     }
