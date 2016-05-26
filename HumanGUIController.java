@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class HumanGUIController extends Controller
 {
     private FishGUI gui;
