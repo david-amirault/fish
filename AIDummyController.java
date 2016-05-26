@@ -170,33 +170,24 @@ public class AIDummyController extends Controller
     public Question ask()
     {
         int[] halfsuits = super.player().halfsuits();
-        int biggest = 0, loc = 0;
-        for (int i = 0; i < 8; i++)
+        double biggest = -1.0;
+        int enemy = (super.player().id() + 1) % 6;
+        int playuh = enemy;
+        Card winnuh = new Card(0);
+        for (int i = 0; i < 3; i++)
         {
-            if (halfsuits[i] > biggest)
+            for (int j = 0; j < 52; j++)
             {
-                biggest = halfsuits[i];
-                loc = i;
+                Card c = new Card(j);
+                if (halfsuits[c.code()] > 0 && visualization.get(6 * j + enemy).doubleValue() > biggest)
+                {
+                    biggest = visualization.get(6 * j + enemy).doubleValue();
+                    playuh = enemy;
+                    winnuh = c; // we have a winner!
+                }
             }
+            enemy = (enemy + 2) % 6;
         }
-        int startRank = (loc % 2) * 6;
-        String startSuit = "";
-        boolean startHighHalf = false;
-        for (Card c : super.player().hand())
-        {
-            if (c.code() == loc)
-            {
-                startSuit = c.suit();
-                startHighHalf = c.highHalf();
-                break;
-            }
-        }
-        while (super.player().gotdem(new Card(ranks[startRank], startSuit, startHighHalf)))
-            startRank++;
-
-        int enemy = (super.player().id() + 1 + 2 * rng.nextInt(3)) % 6;
-        while (super.player().handsizes()[enemy] == 0)
-            enemy = (enemy + 2 * (1 + rng.nextInt(1))) % 6;
-        return new Question(super.player().id(), enemy, new Card(ranks[startRank], startSuit, startHighHalf));
+        return new Question(super.player().id(), playuh, winnuh);
     }
 }
