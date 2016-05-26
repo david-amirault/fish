@@ -179,10 +179,10 @@ public class AIDummyController extends Controller
     @Override
     public void hearQuestion(Question q, List<Double> board)
     {
-        //loadNeuralNetwork("latest.nnt");
-        //runNetwork(q, board, true);
-        //saveNeuralNetwork("latest.nnt");
-        quickQuestion(q);
+        loadNeuralNetwork("latest.nnt");
+        runNetwork(q, board, true);
+        saveNeuralNetwork("latest.nnt");
+        //quickQuestion(q);
         if (!q.worked())
             declareCount++;
         else
