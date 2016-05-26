@@ -186,6 +186,7 @@ public class AIDummyController extends Controller
             }
             enemy = (enemy + 2) % 6;
         }
+        System.out.println(new Question(super.player().id(), playuh, winnuh));
         return new Question(super.player().id(), playuh, winnuh);
     }
 }

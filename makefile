@@ -50,5 +50,7 @@ Deck.class: Deck.java Card.class
 Card.class: Card.java
 	javac Card.java
 
+all: SinglePlayerGame.class SinglePlayerTextGame.class AIDummyGame.class PlayerTester.class DeckTester.class
+
 run:
-	java SinglePlayerGame
+	java AIDummyGame
