@@ -65,15 +65,24 @@ public class AIDummyController extends Controller
         net = new NeuralNetwork(inputs, sizes, 0.1);
         visualization = new ArrayList<Double>(52*6);
         whaddayaKnow();
+        saveNeuralNetwork("latest.nnt");
     }
 
-    public void runNetwork(Question q) {
+    public void runNetwork(Question q, boolean training) {
         List<Double> input = new ArrayList<Double>(52*6+12+52);
         for (Double d : visualization) input.add(d);
         for (int i = 0; i < 64; i++) {
-            input.set(i,new Double(0));
+            input.set(52*6+i,0.0);
         }
-        //NEED TO IMPLEMENT QUESTION LISTENING AND TRAINING.
+        input.set(52*6+52+q.asker(), 1.0);
+        input.set(52*6+52+6+q.target(), 1.0);
+        input.set(52*6+52+12+q.card().id(), 1.0);
+        visualization = net.doOut(input);
+        whaddayaKnow();
+        if (training) {
+            //TODO: REPLACE null WITH REAL BOARD
+            net.trainStep(input, null);
+        }
     }
 
     public void whaddayaKnow() {
@@ -81,12 +90,12 @@ public class AIDummyController extends Controller
         for (int i = 0; i < 52; i++) {
             if (super.player().gotdem(new Card(i))) {
                 for (int j = 0; j < 6; j++) {
-                    visualization.set(6*i+j, new Double(0));
+                    visualization.set(6*i+j, 0.0);
                 }
-                visualization.set(6*i+super.player().id(), new Double(1));
+                visualization.set(6*i+super.player().id(), 1.0);
             }
             else {
-                visualization.set(6*i+super.player().id(), new Double(0));
+                visualization.set(6*i+super.player().id(), 0.0);
             }
         }
     }
@@ -94,6 +103,9 @@ public class AIDummyController extends Controller
     @Override
     public void hearQuestion(Question q)
     {
+        loadNeuralNetwork("latest.nnt");
+        runNetwork(q, true);
+        saveNeuralNetwork("latest.nnt");
         declareCount++;
     }
 
