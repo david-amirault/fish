@@ -68,7 +68,7 @@ public class AIDummyController extends Controller
         saveNeuralNetwork("latest.nnt");
     }
 
-    public void runNetwork(Question q, boolean training) {
+    public void runNetwork(Question q, List<Double> board, boolean training) {
         List<Double> input = new ArrayList<Double>(52*6+12+52);
         for (Double d : visualization) input.add(d);
         for (int i = 0; i < 64; i++) {
@@ -80,8 +80,7 @@ public class AIDummyController extends Controller
         visualization = net.doOut(input);
         whaddayaKnow();
         if (training) {
-            //TODO: REPLACE null WITH REAL BOARD
-            net.trainStep(input, null);
+            net.trainStep(input, board);
         }
     }
 
@@ -101,10 +100,10 @@ public class AIDummyController extends Controller
     }
 
     @Override
-    public void hearQuestion(Question q)
+    public void hearQuestion(Question q, List<Double> board)
     {
         loadNeuralNetwork("latest.nnt");
-        runNetwork(q, true);
+        runNetwork(q, board, true);
         saveNeuralNetwork("latest.nnt");
         declareCount++;
     }

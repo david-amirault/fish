@@ -31,7 +31,7 @@ public class HumanTextController extends Controller
     }
 
     @Override
-    public void hearQuestion(Question q)
+    public void hearQuestion(Question q, List<Double> board)
     {
         System.out.println(q.toString());
         if (!debugging)

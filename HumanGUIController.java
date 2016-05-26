@@ -17,7 +17,7 @@ public class HumanGUIController extends Controller
     }
 
     @Override
-    public void hearQuestion(Question q)
+    public void hearQuestion(Question q, List<Double> board)
     {
         gui.status(q.toString(), "Question");
         gui.repaint();

@@ -118,8 +118,15 @@ public class Game
             for (Controller c : controllers)
                 c.player().sethands(hands);
         }
+        List<Double> board = new ArrayList<Double>(52*6);
+        for (int i = 0; i < 52; i++) {
+            for (int j = 0; j < 6; j++) {
+                if (controllers.get(j).player().gotdem(new Card(i))) board.add(1.0);
+                else board.add(0.0);
+            }
+        }
         for (Controller c : controllers)
-            c.hearQuestion(q);
+            c.hearQuestion(q, board);
 
         return id;
     }
